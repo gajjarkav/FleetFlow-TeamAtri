@@ -2,36 +2,29 @@ import React, { createContext, useContext, useState } from 'react'
 
 const AuthContext = createContext(null)
 
-// Mock user database — swap for real API call
-const MOCK_USERS = [
-    { id: 'U001', email: 'admin@fleetflow.com', password: 'admin123', role: 'admin', name: 'Karan Mehta', avatar: 'KM' },
-    { id: 'U002', email: 'manager@fleetflow.com', password: 'fleet123', role: 'admin', name: 'Priya Sharma', avatar: 'PS' },
-    { id: 'U003', email: 'driver@fleetflow.com', password: 'driver123', role: 'staff', name: 'Rajesh Patel', avatar: 'RP', driverId: 'D001' },
-    { id: 'U004', email: 'staff@fleetflow.com', password: 'staff123', role: 'staff', name: 'Amit Shah', avatar: 'AS', driverId: 'D002' },
-]
+const makeUser = (email, role) => ({
+    id: `U_${Date.now()}`,
+    email,
+    role,
+    name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+    avatar: email.slice(0, 2).toUpperCase(),
+    driverId: 'D001',
+})
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null)
 
+    /** Staff login — any credentials accepted, role = 'staff' */
     const login = (email, password) => {
-        const found = MOCK_USERS.find(
-            u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-        )
-        if (!found) return { success: false, error: 'Invalid email or password.' }
-        const { password: _pw, ...safeUser } = found
-        setUser(safeUser)
-        return { success: true, role: safeUser.role }
+        if (!email || !password) return { success: false, error: 'Please fill in all fields.' }
+        setUser(makeUser(email, 'staff'))
+        return { success: true, role: 'staff' }
     }
 
-    // Admin-only login (from admin portal page)
+    /** Admin login — any credentials accepted, role = 'admin' */
     const loginAsAdmin = (email, password) => {
         if (!email || !password) return { success: false, error: 'All fields required.' }
-        const found = MOCK_USERS.find(
-            u => u.email.toLowerCase() === email.toLowerCase() && u.password === password && u.role === 'admin'
-        )
-        if (!found) return { success: false, error: 'Invalid admin credentials.' }
-        const { password: _pw, ...safeUser } = found
-        setUser(safeUser)
+        setUser(makeUser(email, 'admin'))
         return { success: true, role: 'admin' }
     }
 
