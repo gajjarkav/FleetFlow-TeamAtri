@@ -64,42 +64,44 @@ function PublicRoute({ children }) {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <MaintenanceProvider>
+        <BrowserRouter>
+          <Routes>
 
-          {/* ── Auth Routes ──────────────────────── */}
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/admin-login" element={<PublicRoute><AdminLogin /></PublicRoute>} />
-          <Route path="/access-denied" element={<RequireAuth><AccessDenied /></RequireAuth>} />
+            {/* ── Auth Routes ──────────────────────── */}
+            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/admin-login" element={<PublicRoute><AdminLogin /></PublicRoute>} />
+            <Route path="/access-denied" element={<RequireAuth><AccessDenied /></RequireAuth>} />
 
-          {/* ── Root ─────────────────────────────── */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+            {/* ── Root ─────────────────────────────── */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
 
-          {/* ── Admin Routes ─────────────────────── */}
-          <Route path="/" element={<AdminRoute><Layout /></AdminRoute>}>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="vehicles" element={<Vehicles />} />
-            <Route path="drivers" element={<Drivers />} />
-            <Route path="trips" element={<Trips />} />
-            <Route path="maintenance" element={<Maintenance />} />
-            <Route path="expenses" element={<Expenses />} />
-            <Route path="reports" element={<Reports />} />
-          </Route>
+            {/* ── Admin Routes ─────────────────────── */}
+            <Route path="/" element={<AdminRoute><Layout /></AdminRoute>}>
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="vehicles" element={<Vehicles />} />
+              <Route path="drivers" element={<Drivers />} />
+              <Route path="trips" element={<Trips />} />
+              <Route path="maintenance" element={<Maintenance />} />
+              <Route path="expenses" element={<Expenses />} />
+              <Route path="reports" element={<Reports />} />
+            </Route>
 
-          {/* ── Driver Routes ────────────────────── */}
-          <Route path="/driver" element={<DriverRoute><DriverLayout /></DriverRoute>}>
-            <Route index element={<DriverDashboard />} />
-            <Route path="invitations" element={<RideInvitations />} />
-            <Route path="active-trip" element={<ActiveTrip />} />
-            <Route path="maintenance" element={<DriverMaintenance />} />
-            <Route path="profile" element={<DriverProfile />} />
-          </Route>
+            {/* ── Driver Routes ────────────────────── */}
+            <Route path="/driver" element={<DriverRoute><DriverLayout /></DriverRoute>}>
+              <Route index element={<DriverDashboard />} />
+              <Route path="invitations" element={<RideInvitations />} />
+              <Route path="active-trip" element={<ActiveTrip />} />
+              <Route path="maintenance" element={<DriverMaintenance />} />
+              <Route path="profile" element={<DriverProfile />} />
+            </Route>
 
-          {/* ── Fallback ─────────────────────────── */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+            {/* ── Fallback ─────────────────────────── */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
 
-        </Routes>
-      </BrowserRouter>
+          </Routes>
+        </BrowserRouter>
+      </MaintenanceProvider>
     </AuthProvider>
   )
 }
