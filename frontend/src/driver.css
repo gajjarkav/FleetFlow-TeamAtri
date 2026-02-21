@@ -7,14 +7,16 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background: #080d1a;
+    background: #F1F5F9;
     font-family: 'Inter', system-ui, sans-serif;
 }
 
 .driver-topnav {
     height: 62px;
-    background: #0a1020;
-    border-bottom: 1px solid rgba(59, 130, 246, 0.12);
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -35,23 +37,23 @@
 .driver-nav-brand-icon {
     width: 34px;
     height: 34px;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    background: linear-gradient(135deg, #1E3A8A, #2563EB);
     border-radius: 9px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 14px rgba(37, 99, 235, 0.4);
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.25);
 }
 
 .driver-nav-brand-text {
     font-size: 17px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: #0F172A;
     letter-spacing: 0.4px;
 }
 
 .driver-nav-brand-text span {
-    color: #3b82f6;
+    color: #2563EB;
 }
 
 .driver-nav-links {
@@ -68,25 +70,25 @@
     border-radius: 9px;
     font-size: 13.5px;
     font-weight: 500;
-    color: #64748b;
+    color: #64748B;
     text-decoration: none;
     transition: all 0.18s ease;
     white-space: nowrap;
 }
 
 .driver-nav-link:hover {
-    background: rgba(59, 130, 246, 0.08);
-    color: #cbd5e1;
+    background: rgba(37, 99, 235, 0.06);
+    color: #0F172A;
 }
 
 .driver-nav-link.active {
-    background: rgba(59, 130, 246, 0.14);
-    color: #60a5fa;
+    background: rgba(30, 58, 138, 0.08);
+    color: #1E3A8A;
     font-weight: 600;
 }
 
 .driver-nav-link .nav-badge {
-    background: #ef4444;
+    background: #E11D48;
     color: white;
     font-size: 10px;
     font-weight: 700;
@@ -121,7 +123,7 @@
 .driver-avatar {
     width: 36px;
     height: 36px;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    background: linear-gradient(135deg, #7C3AED, #2563EB);
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -137,10 +139,10 @@
     align-items: center;
     gap: 6px;
     padding: 7px 12px;
-    background: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgba(225, 29, 72, 0.06);
+    border: 1px solid rgba(225, 29, 72, 0.15);
     border-radius: 9px;
-    color: #f87171;
+    color: #E11D48;
     font-size: 12.5px;
     font-weight: 600;
     font-family: inherit;
@@ -149,8 +151,8 @@
 }
 
 .driver-logout-btn:hover {
-    background: rgba(239, 68, 68, 0.16);
-    border-color: rgba(239, 68, 68, 0.4);
+    background: rgba(225, 29, 72, 0.12);
+    border-color: rgba(225, 29, 72, 0.25);
 }
 
 /* ── Page Content ───────────────────────── */
@@ -170,26 +172,26 @@
 .driver-page-header h1 {
     font-size: 24px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: #0F172A;
 }
 
 .driver-page-header p {
     font-size: 13.5px;
-    color: #64748b;
+    color: #64748B;
     margin-top: 4px;
 }
 
 /* ── Hero Status Card ───────────────────── */
 .driver-hero-card {
-    background: linear-gradient(135deg, #0f1d38 0%, #111d35 100%);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.06) 0%, rgba(37, 99, 235, 0.04) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.12);
     border-radius: 18px;
     padding: 28px 32px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.06);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 16px rgba(0, 0, 0, 0.04);
     position: relative;
     overflow: hidden;
 }
@@ -201,20 +203,20 @@
     right: -40px;
     width: 200px;
     height: 200px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.12), transparent 65%);
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.06), transparent 65%);
     pointer-events: none;
 }
 
 .driver-hero-left h2 {
     font-size: 22px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: #0F172A;
     margin-bottom: 4px;
 }
 
 .driver-hero-left p {
     font-size: 13px;
-    color: #64748b;
+    color: #64748B;
 }
 
 .driver-hero-status {
@@ -236,21 +238,21 @@
 }
 
 .driver-status-badge.on-duty {
-    background: rgba(16, 185, 129, 0.15);
-    color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.10);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.20);
 }
 
 .driver-status-badge.on-trip {
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: rgba(37, 99, 235, 0.10);
+    color: #1D4ED8;
+    border: 1px solid rgba(37, 99, 235, 0.20);
 }
 
 .driver-status-badge.off-duty {
-    background: rgba(107, 114, 128, 0.15);
-    color: #9ca3af;
-    border: 1px solid rgba(107, 114, 128, 0.25);
+    background: rgba(107, 114, 128, 0.10);
+    color: #4B5563;
+    border: 1px solid rgba(107, 114, 128, 0.15);
 }
 
 .driver-status-dot {
@@ -270,16 +272,19 @@
 }
 
 .driver-stat-card {
-    background: #0f1829;
-    border: 1px solid rgba(59, 130, 246, 0.1);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.60);
     border-radius: 14px;
     padding: 18px 20px;
     transition: all 0.2s;
 }
 
 .driver-stat-card:hover {
-    border-color: rgba(59, 130, 246, 0.25);
+    border-color: rgba(37, 99, 235, 0.18);
     transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02), 0 8px 24px rgba(0,0,0,0.06);
 }
 
 .driver-stat-card-icon {
@@ -293,35 +298,35 @@
 }
 
 .driver-stat-card-icon.blue {
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
+    background: rgba(37, 99, 235, 0.10);
+    color: #2563EB;
 }
 
 .driver-stat-card-icon.green {
-    background: rgba(16, 185, 129, 0.15);
-    color: #34d399;
+    background: rgba(16, 185, 129, 0.10);
+    color: #10B981;
 }
 
 .driver-stat-card-icon.amber {
-    background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.10);
+    color: #D97706;
 }
 
 .driver-stat-card-icon.purple {
-    background: rgba(139, 92, 246, 0.15);
-    color: #a78bfa;
+    background: rgba(124, 58, 237, 0.10);
+    color: #7C3AED;
 }
 
 .driver-stat-value {
     font-size: 26px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: #0F172A;
     line-height: 1;
 }
 
 .driver-stat-label {
     font-size: 12px;
-    color: #64748b;
+    color: #64748B;
     margin-top: 4px;
     font-weight: 500;
 }
@@ -334,26 +339,28 @@
 }
 
 .invitation-card {
-    background: #0f1829;
-    border: 1px solid rgba(59, 130, 246, 0.12);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.60);
     border-radius: 16px;
     overflow: hidden;
     transition: all 0.2s;
 }
 
 .invitation-card:hover {
-    border-color: rgba(59, 130, 246, 0.28);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+    border-color: rgba(37, 99, 235, 0.20);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .invitation-card.accepted {
-    border-color: rgba(16, 185, 129, 0.3);
-    background: #0a1e16;
+    border-color: rgba(16, 185, 129, 0.25);
+    background: rgba(240, 253, 244, 0.70);
 }
 
 .invitation-card.declined {
-    border-color: rgba(107, 114, 128, 0.2);
-    background: #0d111a;
+    border-color: rgba(107, 114, 128, 0.15);
+    background: rgba(249, 250, 251, 0.60);
     opacity: 0.6;
 }
 
@@ -362,13 +369,13 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 18px 12px;
-    border-bottom: 1px solid rgba(59, 130, 246, 0.08);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 .invitation-trip-id {
     font-size: 11px;
     font-weight: 700;
-    color: #475569;
+    color: #94A3B8;
     letter-spacing: 1px;
     text-transform: uppercase;
 }
@@ -392,17 +399,17 @@
 }
 
 .invitation-route-dot.from {
-    background: #3b82f6;
+    background: #2563EB;
 }
 
 .invitation-route-dot.to {
-    background: #10b981;
+    background: #10B981;
 }
 
 .invitation-route-line {
     flex: 1;
     height: 1px;
-    background: rgba(59, 130, 246, 0.2);
+    background: rgba(37, 99, 235, 0.18);
     position: relative;
 }
 
@@ -410,7 +417,7 @@
     position: absolute;
     right: -1px;
     top: -4px;
-    color: rgba(59, 130, 246, 0.5);
+    color: rgba(37, 99, 235, 0.40);
     font-size: 10px;
 }
 
@@ -420,7 +427,7 @@
 
 .invitation-location-label {
     font-size: 10px;
-    color: #475569;
+    color: #94A3B8;
     text-transform: uppercase;
     letter-spacing: 0.8px;
     font-weight: 600;
@@ -429,7 +436,7 @@
 .invitation-location-name {
     font-size: 13.5px;
     font-weight: 700;
-    color: #f1f5f9;
+    color: #0F172A;
     margin-top: 2px;
 }
 
@@ -441,14 +448,14 @@
 }
 
 .invitation-meta-item {
-    background: rgba(59, 130, 246, 0.05);
+    background: rgba(37, 99, 235, 0.04);
     border-radius: 8px;
     padding: 10px 12px;
 }
 
 .invitation-meta-label {
     font-size: 10px;
-    color: #475569;
+    color: #94A3B8;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.6px;
@@ -457,7 +464,7 @@
 .invitation-meta-value {
     font-size: 13px;
     font-weight: 700;
-    color: #cbd5e1;
+    color: #0F172A;
     margin-top: 3px;
 }
 
@@ -465,16 +472,16 @@
     display: flex;
     gap: 10px;
     padding: 14px 18px;
-    border-top: 1px solid rgba(59, 130, 246, 0.08);
+    border-top: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 .invitation-btn-accept {
     flex: 1;
     padding: 10px;
-    background: rgba(16, 185, 129, 0.15);
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.10);
+    border: 1px solid rgba(16, 185, 129, 0.20);
     border-radius: 9px;
-    color: #34d399;
+    color: #059669;
     font-size: 13px;
     font-weight: 700;
     font-family: inherit;
@@ -487,18 +494,18 @@
 }
 
 .invitation-btn-accept:hover {
-    background: rgba(16, 185, 129, 0.25);
-    border-color: rgba(16, 185, 129, 0.5);
+    background: rgba(16, 185, 129, 0.18);
+    border-color: rgba(16, 185, 129, 0.35);
     transform: translateY(-1px);
 }
 
 .invitation-btn-decline {
     flex: 1;
     padding: 10px;
-    background: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgba(225, 29, 72, 0.06);
+    border: 1px solid rgba(225, 29, 72, 0.15);
     border-radius: 9px;
-    color: #f87171;
+    color: #E11D48;
     font-size: 13px;
     font-weight: 700;
     font-family: inherit;
@@ -511,8 +518,8 @@
 }
 
 .invitation-btn-decline:hover {
-    background: rgba(239, 68, 68, 0.16);
-    border-color: rgba(239, 68, 68, 0.4);
+    background: rgba(225, 29, 72, 0.12);
+    border-color: rgba(225, 29, 72, 0.25);
     transform: translateY(-1px);
 }
 
@@ -529,31 +536,33 @@
 }
 
 .invitation-result-badge.accepted {
-    background: rgba(16, 185, 129, 0.1);
-    color: #34d399;
+    background: rgba(16, 185, 129, 0.08);
+    color: #059669;
 }
 
 .invitation-result-badge.declined {
-    background: rgba(107, 114, 128, 0.1);
-    color: #9ca3af;
+    background: rgba(107, 114, 128, 0.08);
+    color: #4B5563;
 }
 
 /* ── Active Trip Tracker ────────────────── */
 .trip-tracker-card {
-    background: #0f1829;
-    border: 1px solid rgba(59, 130, 246, 0.15);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.60);
     border-radius: 18px;
     overflow: hidden;
     margin-bottom: 24px;
 }
 
 .trip-tracker-header {
-    background: linear-gradient(135deg, #0f1d38, #111d35);
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.06), rgba(37, 99, 235, 0.04));
     padding: 22px 26px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid rgba(59, 130, 246, 0.12);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 .trip-tracker-body {
@@ -583,15 +592,15 @@
     left: calc(50% + 16px);
     right: calc(-50% + 16px);
     height: 2px;
-    background: rgba(59, 130, 246, 0.15);
+    background: rgba(15, 23, 42, 0.08);
 }
 
 .trip-step.done:not(:last-child)::after {
-    background: linear-gradient(90deg, #10b981, rgba(16, 185, 129, 0.3));
+    background: linear-gradient(90deg, #10B981, rgba(16, 185, 129, 0.3));
 }
 
 .trip-step.active:not(:last-child)::after {
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.5), rgba(59, 130, 246, 0.1));
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.5), rgba(37, 99, 235, 0.1));
 }
 
 .trip-step-circle {
@@ -609,46 +618,46 @@
 }
 
 .trip-step.done .trip-step-circle {
-    background: #10b981;
-    border-color: #10b981;
+    background: #10B981;
+    border-color: #10B981;
     color: white;
-    box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.30);
 }
 
 .trip-step.active .trip-step-circle {
-    background: rgba(59, 130, 246, 0.2);
-    border-color: #3b82f6;
-    color: #60a5fa;
-    box-shadow: 0 0 14px rgba(59, 130, 246, 0.3);
+    background: rgba(37, 99, 235, 0.10);
+    border-color: #2563EB;
+    color: #2563EB;
+    box-shadow: 0 0 14px rgba(37, 99, 235, 0.20);
     animation: pulse 2s infinite;
 }
 
 .trip-step.pending .trip-step-circle {
     background: transparent;
-    border-color: rgba(59, 130, 246, 0.2);
-    color: #475569;
+    border-color: rgba(15, 23, 42, 0.12);
+    color: #94A3B8;
 }
 
 .trip-step-label {
     font-size: 11px;
     font-weight: 600;
-    color: #64748b;
+    color: #94A3B8;
     text-align: center;
     letter-spacing: 0.3px;
 }
 
 .trip-step.done .trip-step-label {
-    color: #34d399;
+    color: #059669;
 }
 
 .trip-step.active .trip-step-label {
-    color: #60a5fa;
+    color: #2563EB;
 }
 
 /* ── Profile Card ───────────────────────── */
 .profile-card {
-    background: linear-gradient(135deg, #0f1d38 0%, #111d35 100%);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.06) 0%, rgba(37, 99, 235, 0.04) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.12);
     border-radius: 18px;
     padding: 28px;
     display: flex;
@@ -660,7 +669,7 @@
 .profile-avatar-lg {
     width: 72px;
     height: 72px;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    background: linear-gradient(135deg, #7C3AED, #2563EB);
     border-radius: 18px;
     display: flex;
     align-items: center;
@@ -669,25 +678,25 @@
     font-weight: 800;
     color: white;
     flex-shrink: 0;
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.20);
 }
 
 .profile-name {
     font-size: 22px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: #0F172A;
 }
 
 .profile-role {
     font-size: 12.5px;
     font-weight: 600;
-    color: #60a5fa;
+    color: #2563EB;
     margin-top: 3px;
 }
 
 .profile-email {
     font-size: 12.5px;
-    color: #64748b;
+    color: #64748B;
     margin-top: 2px;
 }
 
@@ -700,8 +709,10 @@
 }
 
 .driver-info-card {
-    background: #0f1829;
-    border: 1px solid rgba(59, 130, 246, 0.1);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.60);
     border-radius: 14px;
     padding: 22px;
 }
@@ -711,7 +722,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    color: #475569;
+    color: #94A3B8;
     margin-bottom: 16px;
     display: flex;
     align-items: center;
@@ -723,7 +734,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 9px 0;
-    border-bottom: 1px solid rgba(59, 130, 246, 0.06);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.05);
     font-size: 13px;
 }
 
@@ -732,12 +743,12 @@
 }
 
 .driver-info-row-label {
-    color: #64748b;
+    color: #64748B;
     font-weight: 500;
 }
 
 .driver-info-row-value {
-    color: #f1f5f9;
+    color: #0F172A;
     font-weight: 600;
 }
 
@@ -745,7 +756,7 @@
 .driver-empty {
     text-align: center;
     padding: 60px 24px;
-    color: #475569;
+    color: #94A3B8;
 }
 
 .driver-empty-icon {
@@ -755,7 +766,7 @@
 
 .driver-empty h3 {
     font-size: 17px;
-    color: #64748b;
+    color: #475569;
     margin-bottom: 8px;
 }
 
@@ -779,34 +790,34 @@
 }
 
 .driver-action-btn.primary {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: linear-gradient(135deg, #1E3A8A, #2563EB);
     color: white;
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 14px rgba(30, 58, 138, 0.25);
 }
 
 .driver-action-btn.primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 20px rgba(30, 58, 138, 0.35);
 }
 
 .driver-action-btn.success {
-    background: rgba(16, 185, 129, 0.15);
-    color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.10);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.20);
 }
 
 .driver-action-btn.success:hover {
-    background: rgba(16, 185, 129, 0.25);
+    background: rgba(16, 185, 129, 0.18);
 }
 
 .driver-action-btn.danger {
-    background: rgba(239, 68, 68, 0.1);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgba(225, 29, 72, 0.06);
+    color: #E11D48;
+    border: 1px solid rgba(225, 29, 72, 0.15);
 }
 
 .driver-action-btn.danger:hover {
-    background: rgba(239, 68, 68, 0.2);
+    background: rgba(225, 29, 72, 0.12);
 }
 
 /* ── Quick Actions ──────────────────────── */
@@ -818,8 +829,10 @@
 }
 
 .quick-action-card {
-    background: #0f1829;
-    border: 1px solid rgba(59, 130, 246, 0.1);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.60);
     border-radius: 14px;
     padding: 18px;
     text-align: center;
@@ -833,9 +846,10 @@
 }
 
 .quick-action-card:hover {
-    border-color: rgba(59, 130, 246, 0.3);
+    border-color: rgba(37, 99, 235, 0.20);
     transform: translateY(-2px);
-    background: #111d35;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .quick-action-icon {
@@ -850,13 +864,13 @@
 .quick-action-label {
     font-size: 12.5px;
     font-weight: 600;
-    color: #94a3b8;
+    color: #475569;
 }
 
 /* ── Access Denied ──────────────────────── */
 .access-denied-root {
     min-height: 100vh;
-    background: #080d1a;
+    background: #F1F5F9;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -869,7 +883,7 @@
 .access-denied-code {
     font-size: 96px;
     font-weight: 900;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    background: linear-gradient(135deg, #7C3AED, #2563EB);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -880,13 +894,13 @@
 .access-denied-title {
     font-size: 26px;
     font-weight: 800;
-    color: #f1f5f9;
+    color: #0F172A;
     margin-bottom: 10px;
 }
 
 .access-denied-msg {
     font-size: 14px;
-    color: #64748b;
+    color: #64748B;
     max-width: 400px;
     line-height: 1.7;
     margin-bottom: 28px;
@@ -896,13 +910,13 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: rgba(37, 99, 235, 0.08);
+    border: 1px solid rgba(37, 99, 235, 0.15);
     border-radius: 100px;
     padding: 6px 16px;
     font-size: 12px;
     font-weight: 700;
-    color: #60a5fa;
+    color: #1D4ED8;
     margin-bottom: 28px;
     letter-spacing: 0.5px;
 }
