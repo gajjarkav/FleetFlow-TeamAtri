@@ -1,82 +1,112 @@
-import React, { useState } from 'react'
-import { Plus, Search, AlertTriangle, CheckCircle, MapPin, Weight } from 'lucide-react'
+﻿import React, { useState, useEffect } from 'react'
+import { Plus, Search, AlertTriangle, CheckCircle, Route, RefreshCw } from 'lucide-react'
 import Modal from '../components/Modal'
 import Toast, { useToast } from '../components/Toast'
-import { trips as initialTrips, vehicles, drivers, getVehicleById, getDriverById, getDaysUntilExpiry } from '../data/mockData'
+import { listTripsApi, createTripApi } from '../api/trips'
+import { listVehiclesApi } from '../api/vehicles'
+import { listDispatchersApi } from '../api/auth'
 
-const statusLabel = { in_progress: 'In Progress', completed: 'Completed', scheduled: 'Scheduled', cancelled: 'Cancelled' }
-const defaultForm = { vehicleId: '', driverId: '', origin: '', destination: '', cargoWeight: '', notes: '' }
+/**
+ * Trip status from backend: assigned | in_progress | completed | cancelled
+ */
+const statusLabel = {
+    assigned: 'Assigned',
+    in_progress: 'In Progress',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+}
+
+const defaultForm = {
+    vehicle_id: '',
+    dispatcher_id: '',
+    total_km: '',
+    start_time: '',
+    end_time: '',
+    payment_amount: '',
+}
 
 export default function Trips() {
-    const [trips, setTrips] = useState(initialTrips)
+    const [trips, setTrips] = useState([])
+    const [vehicles, setVehicles] = useState([])
+    const [dispatchers, setDispatchers] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [fetchError, setFetchError] = useState('')
     const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState('all')
     const [showModal, setShowModal] = useState(false)
     const [form, setForm] = useState(defaultForm)
     const [errors, setErrors] = useState({})
+    const [saving, setSaving] = useState(false)
     const { toasts, addToast, removeToast } = useToast()
+
+    const load = () => {
+        setLoading(true)
+        Promise.all([listTripsApi(), listVehiclesApi(), listDispatchersApi()])
+            .then(([t, v, d]) => { setTrips(t); setVehicles(v); setDispatchers(d) })
+            .catch(e => setFetchError(e.message))
+            .finally(() => setLoading(false))
+    }
+
+    useEffect(load, [])
+
+    const vehicleById = (id) => vehicles.find(v => v.id === id)
+    const dispatcherById = (id) => dispatchers.find(d => d.id === id)
 
     const filtered = trips.filter(t => {
         const matchStatus = statusFilter === 'all' || t.status === statusFilter
         const q = search.toLowerCase()
-        const v = getVehicleById(t.vehicleId)
-        const d = getDriverById(t.driverId)
-        const matchSearch = !q || t.id.toLowerCase().includes(q) || t.origin.toLowerCase().includes(q) || t.destination.toLowerCase().includes(q) || (v && v.regNo.toLowerCase().includes(q)) || (d && d.name.toLowerCase().includes(q))
+        const veh = vehicleById(t.vehicle_id)
+        const disp = dispatcherById(t.dispatcher_id)
+        const matchSearch = !q
+            || String(t.id).includes(q)
+            || (veh && veh.plate_number.toLowerCase().includes(q))
+            || (disp && disp.name?.toLowerCase().includes(q))
         return matchStatus && matchSearch
-    })
-
-    const availableVehicles = vehicles.filter(v => v.status === 'available')
-    const availableDrivers = drivers.filter(d => {
-        const days = getDaysUntilExpiry(d.licenseExpiry)
-        return d.status === 'available' && days > 0
     })
 
     const validate = () => {
         const e = {}
-        if (!form.vehicleId) { e.vehicleId = 'Select a vehicle'; }
-        if (!form.driverId) { e.driverId = 'Select a driver'; }
-        if (!form.origin.trim()) e.origin = 'Origin is required'
-        if (!form.destination.trim()) e.destination = 'Destination is required'
-        if (!form.cargoWeight || +form.cargoWeight < 0) { e.cargoWeight = 'Enter valid cargo weight'; }
-
-        if (form.vehicleId && form.cargoWeight) {
-            const v = getVehicleById(form.vehicleId)
-            if (v && +form.cargoWeight > v.capacity) {
-                e.cargoWeight = `Cargo (${form.cargoWeight} kg) exceeds vehicle capacity (${v.capacity} kg). Reduce load!`
-            }
-        }
+        if (!form.vehicle_id) e.vehicle_id = 'Select a vehicle'
+        if (!form.dispatcher_id) e.dispatcher_id = 'Select a dispatcher'
+        if (!form.total_km || +form.total_km <= 0) e.total_km = 'Enter total KM'
+        if (!form.start_time) e.start_time = 'Start time required'
+        if (!form.end_time) e.end_time = 'End time required'
+        if (form.start_time && form.end_time && form.start_time >= form.end_time) e.end_time = 'End must be after start'
+        if (!form.payment_amount || +form.payment_amount < 0) e.payment_amount = 'Enter payment amount'
         return e
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const e = validate()
-        if (Object.keys(e).length) {
-            setErrors(e)
-            if (e.cargoWeight && e.cargoWeight.includes('exceeds')) {
-                addToast({ type: 'error', title: 'Dispatch Blocked', msg: `Cargo exceeds vehicle capacity. This trip cannot be dispatched.` })
-            }
-            return
+        if (Object.keys(e).length) { setErrors(e); return }
+        setSaving(true)
+        try {
+            const created = await createTripApi({
+                vehicle_id: +form.vehicle_id,
+                dispatcher_id: +form.dispatcher_id,
+                total_km: +form.total_km,
+                start_time: new Date(form.start_time).toISOString(),
+                end_time: new Date(form.end_time).toISOString(),
+                payment_amount: +form.payment_amount,
+            })
+            setTrips(prev => [created, ...prev])
+            setShowModal(false)
+            setForm(defaultForm)
+            setErrors({})
+            addToast({ type: 'success', title: 'Trip Created', msg: `Trip #${created.id} has been dispatched.` })
+        } catch (err) {
+            setErrors({ _api: err.message })
+        } finally {
+            setSaving(false)
         }
-        const newT = {
-            id: `T${String(trips.length + 1).padStart(3, '0')}`,
-            ...form,
-            cargoWeight: +form.cargoWeight,
-            status: 'scheduled',
-            startDate: '2026-02-22',
-            endDate: null,
-            distanceKm: null,
-            fuelUsed: null,
-        }
-        setTrips(prev => [newT, ...prev])
-        setShowModal(false)
-        setForm(defaultForm)
-        setErrors({})
-        addToast({ type: 'success', title: 'Trip Scheduled', msg: `New trip from ${newT.origin} to ${newT.destination} has been dispatched.` })
     }
 
     const f = (k) => (e) => { setForm(p => ({ ...p, [k]: e.target.value })); setErrors(p => ({ ...p, [k]: undefined })) }
 
-    const selectedVehicle = form.vehicleId ? getVehicleById(form.vehicleId) : null
+    const availableVehicles = vehicles.filter(v => v.status === 'available')
+    const availableDispatchers = dispatchers.filter(d => d.id)
+
+    const fmtDT = (dt) => dt ? new Date(dt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }) : 'â€”'
 
     return (
         <div>
@@ -87,14 +117,19 @@ export default function Trips() {
                     <h1>Trips</h1>
                     <p>Dispatch trips, track active routes, and manage logistics assignments</p>
                 </div>
-                <button className="btn btn-primary" onClick={() => { setShowModal(true); setForm(defaultForm); setErrors({}) }}>
-                    <Plus size={16} /> Dispatch Trip
-                </button>
+                <div style={{ display: 'flex', gap: 10 }}>
+                    <button className="btn btn-secondary" onClick={load} title="Refresh"><RefreshCw size={15} /></button>
+                    <button className="btn btn-primary" onClick={() => { setShowModal(true); setForm(defaultForm); setErrors({}) }}>
+                        <Plus size={16} /> Dispatch Trip
+                    </button>
+                </div>
             </div>
+
+            {fetchError && <div className="alert-banner danger"><AlertTriangle size={17} /><div>{fetchError}</div></div>}
 
             {/* Stats row */}
             <div className="stat-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginBottom: 24 }}>
-                {Object.entries({ 'In Progress': 'in_progress', 'Scheduled': 'scheduled', 'Completed': 'completed', 'Cancelled': 'cancelled' }).map(([label, st]) => (
+                {Object.entries({ 'Assigned': 'assigned', 'In Progress': 'in_progress', 'Completed': 'completed', 'Cancelled': 'cancelled' }).map(([label, st]) => (
                     <div key={st} className="stat-card" style={{ cursor: 'pointer' }} onClick={() => setStatusFilter(st)}>
                         <div className="stat-info">
                             <div className="stat-value" style={{ fontSize: 22 }}>{trips.filter(t => t.status === st).length}</div>
@@ -111,7 +146,7 @@ export default function Trips() {
                     <span className="table-title">Trip Records</span>
                     <div className="table-actions">
                         <div className="filter-tabs">
-                            {['all', 'in_progress', 'scheduled', 'completed', 'cancelled'].map(s => (
+                            {['all', 'assigned', 'in_progress', 'completed', 'cancelled'].map(s => (
                                 <button key={s} className={`filter-tab${statusFilter === s ? ' active' : ''}`} onClick={() => setStatusFilter(s)}>
                                     {s === 'all' ? 'All' : statusLabel[s]}
                                 </button>
@@ -123,52 +158,50 @@ export default function Trips() {
                         </div>
                     </div>
                 </div>
+
+                {loading ? (
+                    <div style={{ color: 'var(--text-secondary)', padding: 32 }}>Loading tripsâ€¦</div>
+                ) : (
                 <table>
                     <thead>
                         <tr>
-                            <th>Trip ID</th>
-                            <th>Route</th>
+                            <th>#</th>
                             <th>Vehicle</th>
-                            <th>Driver</th>
-                            <th>Cargo</th>
-                            <th>Date</th>
+                            <th>Dispatcher</th>
+                            <th>Distance</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Amount</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filtered.map(t => {
-                            const v = getVehicleById(t.vehicleId)
-                            const d = getDriverById(t.driverId)
+                            const veh = vehicleById(t.vehicle_id)
+                            const disp = dispatcherById(t.dispatcher_id)
                             return (
                                 <tr key={t.id}>
-                                    <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--accent-blue-light)' }}>{t.id}</td>
-                                    <td>
-                                        <div className="flex items-center gap-2">
-                                            <MapPin size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                                            <div>
-                                                <div style={{ fontWeight: 600, fontSize: 12 }}>{t.origin}</div>
-                                                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>ÔåÆ {t.destination}</div>
-                                            </div>
-                                        </div>
+                                    <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--accent-blue-light)' }}>#{t.id}</td>
+                                    <td style={{ fontSize: 12 }}>
+                                        {veh ? <><div style={{ fontWeight: 600 }}>{veh.plate_number}</div><div style={{ color: 'var(--text-muted)', fontSize: 11 }}>{veh.name}</div></> : `Vehicle #${t.vehicle_id}`}
                                     </td>
-                                    <td style={{ fontSize: 12 }}>{v ? v.regNo : t.vehicleId}</td>
-                                    <td style={{ fontSize: 12 }}>{d ? d.name : t.driverId}</td>
-                                    <td>
-                                        <div className="flex items-center gap-1">
-                                            <Weight size={12} style={{ color: 'var(--text-muted)' }} />
-                                            <span>{t.cargoWeight?.toLocaleString()} kg</span>
-                                        </div>
+                                    <td style={{ fontSize: 12 }}>
+                                        {disp ? <><div style={{ fontWeight: 600 }}>{disp.name || disp.email}</div><div style={{ color: 'var(--text-muted)', fontSize: 11 }}>{disp.email}</div></> : `Dispatcher #${t.dispatcher_id}`}
                                     </td>
-                                    <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t.startDate}</td>
-                                    <td><span className={`badge ${t.status}`}>{statusLabel[t.status]}</span></td>
+                                    <td style={{ fontSize: 12 }}>{t.total_km} km</td>
+                                    <td style={{ fontSize: 11, color: 'var(--text-muted)' }}>{fmtDT(t.start_time)}</td>
+                                    <td style={{ fontSize: 11, color: 'var(--text-muted)' }}>{fmtDT(t.end_time)}</td>
+                                    <td style={{ fontSize: 12, fontWeight: 600, color: '#34d399' }}>â‚¹{Number(t.payment_amount).toLocaleString('en-IN')}</td>
+                                    <td><span className={`badge ${t.status}`}>{statusLabel[t.status] || t.status}</span></td>
                                 </tr>
                             )
                         })}
                         {filtered.length === 0 && (
-                            <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>No trips found</td></tr>
+                            <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>No trips found</td></tr>
                         )}
                     </tbody>
                 </table>
+                )}
             </div>
 
             {/* Dispatch Modal */}
@@ -176,96 +209,58 @@ export default function Trips() {
                 <Modal title="Dispatch New Trip" onClose={() => setShowModal(false)}
                     footer={<>
                         <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                        <button className="btn btn-primary" onClick={handleSubmit}><CheckCircle size={15} /> Dispatch Trip</button>
+                        <button className="btn btn-primary" onClick={handleSubmit} disabled={saving}>
+                            <CheckCircle size={15} /> {saving ? 'Dispatchingâ€¦' : 'Dispatch Trip'}
+                        </button>
                     </>}
                 >
-                    {availableVehicles.length === 0 && (
-                        <div className="alert-banner warning" style={{ marginBottom: 16 }}>
-                            <AlertTriangle size={15} /> No vehicles available for dispatch. All are either in use or under maintenance.
-                        </div>
-                    )}
-                    {availableDrivers.length === 0 && (
-                        <div className="alert-banner danger" style={{ marginBottom: 16 }}>
-                            <AlertTriangle size={15} /> No eligible drivers available. Check license status and current assignments.
-                        </div>
-                    )}
-
                     <div className="form-grid">
+                        {errors._api && <div className="form-error" style={{ gridColumn: '1/-1' }}>{errors._api}</div>}
+
                         <div className="form-group full">
-                            <label className="form-label">Vehicle *
-                                <span style={{ marginLeft: 8, fontSize: 10, color: 'var(--text-muted)', fontWeight: 400 }}>
-                                    Only available vehicles shown (maintenance vehicles excluded)
-                                </span>
-                            </label>
-                            <select className={`form-control${errors.vehicleId ? ' error' : ''}`} value={form.vehicleId} onChange={f('vehicleId')}>
-                                <option value="">ÔÇö Select Vehicle ÔÇö</option>
+                            <label className="form-label">Vehicle * <span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 400 }}>(available only)</span></label>
+                            <select className={`form-control${errors.vehicle_id ? ' error' : ''}`} value={form.vehicle_id} onChange={f('vehicle_id')}>
+                                <option value="">â€” Select Vehicle â€”</option>
                                 {availableVehicles.map(v => (
-                                    <option key={v.id} value={v.id}>{v.regNo} ÔÇô {v.make} {v.model} ({v.capacity.toLocaleString()} kg cap.)</option>
+                                    <option key={v.id} value={v.id}>{v.plate_number} â€“ {v.name} ({v.capacity_kg.toLocaleString()} kg)</option>
                                 ))}
                             </select>
-                            {errors.vehicleId && <span className="form-error"><AlertTriangle size={12} /> {errors.vehicleId}</span>}
+                            {errors.vehicle_id && <span className="form-error"><AlertTriangle size={12} /> {errors.vehicle_id}</span>}
                         </div>
+
                         <div className="form-group full">
-                            <label className="form-label">Driver *
-                                <span style={{ marginLeft: 8, fontSize: 10, color: 'var(--text-muted)', fontWeight: 400 }}>
-                                    Only drivers with valid licenses shown
-                                </span>
-                            </label>
-                            <select className={`form-control${errors.driverId ? ' error' : ''}`} value={form.driverId} onChange={f('driverId')}>
-                                <option value="">ÔÇö Select Driver ÔÇö</option>
-                                {availableDrivers.map(d => (
-                                    <option key={d.id} value={d.id}>{d.name} ÔÇô License: {d.licenseNo}</option>
+                            <label className="form-label">Dispatcher *</label>
+                            <select className={`form-control${errors.dispatcher_id ? ' error' : ''}`} value={form.dispatcher_id} onChange={f('dispatcher_id')}>
+                                <option value="">â€” Select Dispatcher â€”</option>
+                                {availableDispatchers.map(d => (
+                                    <option key={d.id} value={d.id}>{d.name || d.email} ({d.email})</option>
                                 ))}
                             </select>
-                            {errors.driverId && <span className="form-error"><AlertTriangle size={12} /> {errors.driverId}</span>}
+                            {errors.dispatcher_id && <span className="form-error"><AlertTriangle size={12} /> {errors.dispatcher_id}</span>}
                         </div>
+
                         <div className="form-group">
-                            <label className="form-label">Origin *</label>
-                            <input className={`form-control${errors.origin ? ' error' : ''}`} placeholder="e.g. Ahmedabad Depot" value={form.origin} onChange={f('origin')} />
-                            {errors.origin && <span className="form-error">{errors.origin}</span>}
+                            <label className="form-label">Total Distance (km) *</label>
+                            <input className={`form-control${errors.total_km ? ' error' : ''}`} type="number" placeholder="e.g. 265" value={form.total_km} onChange={f('total_km')} />
+                            {errors.total_km && <span className="form-error">{errors.total_km}</span>}
                         </div>
+
                         <div className="form-group">
-                            <label className="form-label">Destination *</label>
-                            <input className={`form-control${errors.destination ? ' error' : ''}`} placeholder="e.g. Surat Warehouse" value={form.destination} onChange={f('destination')} />
-                            {errors.destination && <span className="form-error">{errors.destination}</span>}
+                            <label className="form-label">Payment Amount (â‚¹) *</label>
+                            <input className={`form-control${errors.payment_amount ? ' error' : ''}`} type="number" placeholder="e.g. 15000" value={form.payment_amount} onChange={f('payment_amount')} />
+                            {errors.payment_amount && <span className="form-error">{errors.payment_amount}</span>}
                         </div>
-                        <div className="form-group full">
-                            <label className="form-label">
-                                Cargo Weight (kg) *
-                                {selectedVehicle && (
-                                    <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--text-muted)', fontWeight: 400 }}>
-                                        Max: {selectedVehicle.capacity.toLocaleString()} kg
-                                    </span>
-                                )}
-                            </label>
-                            <input
-                                className={`form-control${errors.cargoWeight ? ' error' : ''}`}
-                                type="number"
-                                placeholder="e.g. 500"
-                                value={form.cargoWeight}
-                                onChange={f('cargoWeight')}
-                            />
-                            {selectedVehicle && form.cargoWeight && +form.cargoWeight > 0 && (
-                                <div style={{ marginTop: 6 }}>
-                                    <div style={{ height: 4, background: 'var(--border-color)', borderRadius: 2, overflow: 'hidden' }}>
-                                        <div style={{
-                                            height: '100%',
-                                            width: `${Math.min(100, (+form.cargoWeight / selectedVehicle.capacity) * 100)}%`,
-                                            background: +form.cargoWeight > selectedVehicle.capacity ? 'var(--danger)' : +form.cargoWeight > selectedVehicle.capacity * 0.8 ? 'var(--warning)' : 'var(--success)',
-                                            borderRadius: 2,
-                                            transition: 'width 0.3s ease',
-                                        }} />
-                                    </div>
-                                    <span style={{ fontSize: 11, color: +form.cargoWeight > selectedVehicle.capacity ? 'var(--danger)' : 'var(--text-muted)' }}>
-                                        {Math.round((+form.cargoWeight / selectedVehicle.capacity) * 100)}% of capacity
-                                    </span>
-                                </div>
-                            )}
-                            {errors.cargoWeight && <span className="form-error"><AlertTriangle size={12} /> {errors.cargoWeight}</span>}
+
+                        <div className="form-group">
+                            <label className="form-label">Start Date & Time *</label>
+                            <input className={`form-control${errors.start_time ? ' error' : ''}`} type="datetime-local" value={form.start_time} onChange={f('start_time')} />
+                            {errors.start_time && <span className="form-error">{errors.start_time}</span>}
                         </div>
-                        <div className="form-group full">
-                            <label className="form-label">Notes</label>
-                            <input className="form-control" placeholder="Optional notes..." value={form.notes} onChange={f('notes')} />
+
+                        <div className="form-group">
+                            <label className="form-label">End Date & Time *</label>
+                            <input className={`form-control${errors.end_time ? ' error' : ''}`} type="datetime-local" value={form.end_time} onChange={f('end_time')} />
+                            {errors.end_time && <span className="form-error">{errors.end_time}</span>}
                         </div>
                     </div>
                 </Modal>

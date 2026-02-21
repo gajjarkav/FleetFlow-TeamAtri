@@ -1,39 +1,61 @@
-import React, { useState } from 'react'
-import { Search, Wrench, AlertTriangle, CheckCircle, Clock, FileText, ThumbsUp, ThumbsDown, Eye } from 'lucide-react'
-import { vehicles, getVehicleById } from '../data/mockData'
-import { useMaintenance } from '../context/MaintenanceContext'
+﻿import React, { useState, useEffect } from 'react'
+import { Search, Wrench, AlertTriangle, CheckCircle, Clock, FileText, RefreshCw } from 'lucide-react'
+import { listVehiclesApi } from '../api/vehicles'
+import { listMaintenanceApi, updateMaintenanceStatusApi } from '../api/maintenance'
 
-const statusLabel = { scheduled: 'Scheduled', in_progress: 'In Progress', completed: 'Completed' }
+/**
+ * Maintenance status from backend: pending | approved | rejected | completed
+ */
+const statusLabel = { pending: 'Pending', approved: 'Approved', rejected: 'Rejected', completed: 'Completed' }
 
-const reimbStyle = {
-    pending: { label: 'Pending', color: '#fbbf24', bg: 'rgba(245,158,11,0.12)' },
-    approved: { label: 'Approved', color: '#34d399', bg: 'rgba(16,185,129,0.12)' },
-    rejected: { label: 'Rejected', color: '#f87171', bg: 'rgba(239,68,68,0.12)' },
+const statusStyle = {
+    pending: { color: '#fbbf24', bg: 'rgba(245,158,11,0.1)', Icon: Clock },
+    approved: { color: '#60a5fa', bg: 'rgba(59,130,246,0.1)', Icon: Wrench },
+    rejected: { color: '#f87171', bg: 'rgba(239,68,68,0.1)', Icon: AlertTriangle },
+    completed: { color: '#34d399', bg: 'rgba(16,185,129,0.1)', Icon: CheckCircle },
 }
 
 export default function Maintenance() {
-    const { records, vehicleStatuses, approveReimbursement, rejectReimbursement, updateStatus } = useMaintenance()
+    const [records, setRecords] = useState([])
+    const [vehicles, setVehicles] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [fetchError, setFetchError] = useState('')
     const [search, setSearch] = useState('')
     const [filter, setFilter] = useState('all')
-    const [reimbFilter, setReimbFilter] = useState('all')
-    const [billPreview, setBillPreview] = useState(null) // { url, name }
 
-    // ── Filtered records ──
+    const load = () => {
+        setLoading(true)
+        Promise.all([listMaintenanceApi(), listVehiclesApi()])
+            .then(([m, v]) => { setRecords(m); setVehicles(v) })
+            .catch(e => setFetchError(e.message))
+            .finally(() => setLoading(false))
+    }
+
+    useEffect(load, [])
+
+    const vehicleById = (id) => vehicles.find(v => v.id === id)
+
     const filtered = records.filter(r => {
         const matchStatus = filter === 'all' || r.status === filter
-        const matchReimb = reimbFilter === 'all' || r.reimbursementStatus === reimbFilter
         const q = search.toLowerCase()
-        const v = getVehicleById(r.vehicleId)
+        const veh = vehicleById(r.vehicle_id)
         const matchSearch = !q
-            || r.type.toLowerCase().includes(q)
+            || r.maintenance_type.toLowerCase().includes(q)
             || (r.workshop || '').toLowerCase().includes(q)
-            || (v && v.regNo.toLowerCase().includes(q))
-            || (r.driverName || '').toLowerCase().includes(q)
-        return matchStatus && matchReimb && matchSearch
+            || (veh && veh.plate_number.toLowerCase().includes(q))
+        return matchStatus && matchSearch
     })
 
-    const maintenanceVehicles = vehicles.filter(v => (vehicleStatuses[v.id] || v.status) === 'maintenance')
-    const pendingReimb = records.filter(r => r.reimbursementStatus === 'pending')
+    const handleStatusChange = async (id, newStatus) => {
+        try {
+            const updated = await updateMaintenanceStatusApi(id, newStatus)
+            setRecords(prev => prev.map(r => r.id === id ? updated : r))
+        } catch (err) {
+            alert('Failed to update status: ' + err.message)
+        }
+    }
+
+    const pendingCount = records.filter(r => r.status === 'pending').length
 
     return (
         <div>
@@ -41,43 +63,38 @@ export default function Maintenance() {
             <div className="page-header">
                 <div>
                     <h1>Maintenance</h1>
-                    <p>Review driver-submitted maintenance requests, approve bills, and monitor fleet health</p>
+                    <p>Review dispatcher-submitted maintenance requests and update statuses</p>
                 </div>
+                <button className="btn btn-secondary" onClick={load} title="Refresh"><RefreshCw size={15} /></button>
             </div>
 
-            {/* Alerts */}
-            {pendingReimb.length > 0 && (
+            {fetchError && <div className="alert-banner danger"><AlertTriangle size={17} /><div>{fetchError}</div></div>}
+
+            {/* Pending alert */}
+            {pendingCount > 0 && (
                 <div style={{ marginBottom: 16, background: 'rgba(59,130,246,0.07)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 12, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
                     <FileText size={16} style={{ color: '#60a5fa', flexShrink: 0 }} />
                     <div>
-                        <strong style={{ color: '#93c5fd' }}>{pendingReimb.length} reimbursement request{pendingReimb.length > 1 ? 's' : ''} pending your approval</strong>
-                        <span style={{ color: '#64748b', fontSize: 12, marginLeft: 8 }}>Review bills and approve or reject below.</span>
+                        <strong style={{ color: '#93c5fd' }}>{pendingCount} maintenance request{pendingCount > 1 ? 's' : ''} pending review</strong>
+                        <span style={{ color: '#64748b', fontSize: 12, marginLeft: 8 }}>Use the status dropdown below to approve or reject.</span>
                     </div>
-                </div>
-            )}
-            {maintenanceVehicles.length > 0 && (
-                <div className="alert-banner warning" style={{ marginBottom: 24 }}>
-                    <AlertTriangle size={17} style={{ flexShrink: 0 }} />
-                    <div><strong>{maintenanceVehicles.length} vehicle(s) currently under maintenance:</strong> {maintenanceVehicles.map(v => v.regNo).join(', ')} — unavailable for dispatch.</div>
                 </div>
             )}
 
             {/* Summary cards */}
             <div className="stat-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', marginBottom: 24 }}>
-                {[
-                    { label: 'Scheduled', count: records.filter(r => r.status === 'scheduled').length, cls: 'amber', Icon: Clock },
-                    { label: 'In Progress', count: records.filter(r => r.status === 'in_progress').length, cls: 'blue', Icon: Wrench },
-                    { label: 'Completed', count: records.filter(r => r.status === 'completed').length, cls: 'green', Icon: CheckCircle },
-                    { label: 'Pending Bills', count: pendingReimb.length, cls: 'red', Icon: FileText },
-                ].map(s => (
-                    <div key={s.label} className="stat-card">
-                        <div className={`stat-icon ${s.cls}`}><s.Icon size={20} /></div>
-                        <div className="stat-info">
-                            <div className="stat-value" style={{ fontSize: 20 }}>{s.count}</div>
-                            <div className="stat-label">{s.label}</div>
+                {Object.entries(statusLabel).map(([status, label]) => {
+                    const { color, bg, Icon } = statusStyle[status]
+                    return (
+                        <div key={status} className="stat-card" style={{ cursor: 'pointer' }} onClick={() => setFilter(status)}>
+                            <div className="stat-icon" style={{ background: bg, color }}><Icon size={20} /></div>
+                            <div className="stat-info">
+                                <div className="stat-value" style={{ fontSize: 20 }}>{records.filter(r => r.status === status).length}</div>
+                                <div className="stat-label">{label}</div>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    )
+                })}
             </div>
 
             {/* Table */}
@@ -86,16 +103,9 @@ export default function Maintenance() {
                     <span className="table-title">Maintenance Requests</span>
                     <div className="table-actions">
                         <div className="filter-tabs">
-                            {['all', 'scheduled', 'in_progress', 'completed'].map(s => (
+                            {['all', 'pending', 'approved', 'rejected', 'completed'].map(s => (
                                 <button key={s} className={`filter-tab${filter === s ? ' active' : ''}`} onClick={() => setFilter(s)}>
-                                    {s === 'all' ? 'All' : statusLabel[s]}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="filter-tabs" style={{ gap: 4 }}>
-                            {['all', 'pending', 'approved', 'rejected'].map(s => (
-                                <button key={s} className={`filter-tab${reimbFilter === s ? ' active' : ''}`} onClick={() => setReimbFilter(s)} style={{ fontSize: 11 }}>
-                                    {s === 'all' ? 'All Bills' : s.charAt(0).toUpperCase() + s.slice(1)}
+                                    {s === 'all' ? 'All' : statusLabel[s] || s}
                                 </button>
                             ))}
                         </div>
@@ -105,117 +115,74 @@ export default function Maintenance() {
                         </div>
                     </div>
                 </div>
+
+                {loading ? (
+                    <div style={{ color: 'var(--text-secondary)', padding: 32 }}>Loading maintenance recordsâ€¦</div>
+                ) : (
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>#</th>
                             <th>Vehicle</th>
-                            <th>Service Type</th>
-                            <th>Driver</th>
+                            <th>Type</th>
+                            <th>Description</th>
                             <th>Workshop</th>
                             <th>Date</th>
-                            <th>Cost (₹)</th>
-                            <th>Bill</th>
+                            <th>Est. Cost (â‚¹)</th>
                             <th>Status</th>
-                            <th>Reimbursement</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filtered.map(r => {
-                            const v = getVehicleById(r.vehicleId)
-                            const rs = reimbStyle[r.reimbursementStatus] || reimbStyle.pending
-                            const vStatus = vehicleStatuses[r.vehicleId]
+                            const veh = vehicleById(r.vehicle_id)
+                            const ss = statusStyle[r.status] || statusStyle.pending
                             return (
-                                <tr key={r.id} style={r.reimbursementStatus === 'pending' ? { background: 'rgba(59,130,246,0.03)' } : {}}>
-                                    <td style={{ fontFamily: 'monospace', color: 'var(--text-muted)', fontSize: 12 }}>{r.id}</td>
+                                <tr key={r.id} style={r.status === 'pending' ? { background: 'rgba(59,130,246,0.03)' } : {}}>
+                                    <td style={{ fontFamily: 'monospace', color: 'var(--text-muted)', fontSize: 12 }}>#{r.id}</td>
                                     <td>
-                                        <div style={{ fontWeight: 600, fontSize: 13 }}>{v ? v.regNo : r.vehicleId}</div>
-                                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{v ? `${v.make} ${v.model}` : ''}</div>
-                                        {vStatus === 'maintenance' && r.status !== 'completed' && (
-                                            <span style={{ fontSize: 10, fontWeight: 700, color: '#fbbf24', background: 'rgba(245,158,11,0.1)', padding: '2px 6px', borderRadius: 6, display: 'inline-block', marginTop: 3 }}>Under Service</span>
-                                        )}
+                                        <div style={{ fontWeight: 600, fontSize: 13 }}>{veh ? veh.plate_number : `Vehicle #${r.vehicle_id}`}</div>
+                                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{veh ? `${veh.name} Â· ${veh.category}` : ''}</div>
                                     </td>
-                                    <td>
-                                        <div style={{ fontWeight: 600 }}>{r.type}</div>
-                                        {r.description && <div style={{ fontSize: 11, color: 'var(--text-muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.description}</div>}
+                                    <td style={{ fontWeight: 600, fontSize: 13 }}>{r.maintenance_type}</td>
+                                    <td style={{ fontSize: 11, color: 'var(--text-muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {r.description || 'â€”'}
                                     </td>
-                                    <td style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{r.driverName || '—'}</td>
-                                    <td style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{r.workshop || '—'}</td>
-                                    <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{r.scheduledDate}</td>
-                                    <td style={{ fontWeight: 700 }}>{r.cost ? `₹${r.cost.toLocaleString()}` : '—'}</td>
-                                    <td>
-                                        {r.billUrl ? (
-                                            <button
-                                                onClick={() => setBillPreview({ url: r.billUrl, name: r.billFileName })}
-                                                style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 700, color: '#60a5fa', background: 'rgba(59,130,246,0.08)', border: 'none', borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit' }}
-                                            >
-                                                <Eye size={12} /> View Bill
-                                            </button>
-                                        ) : (
-                                            <span style={{ fontSize: 12, color: '#334155' }}>No bill</span>
-                                        )}
+                                    <td style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{r.workshop || 'â€”'}</td>
+                                    <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                                        {r.date ? new Date(r.date).toLocaleDateString('en-IN') : 'â€”'}
                                     </td>
-                                    <td><span className={`badge ${r.status}`}>{statusLabel[r.status]}</span></td>
+                                    <td style={{ fontWeight: 700 }}>â‚¹{Number(r.estimated_cost).toLocaleString('en-IN')}</td>
                                     <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            <span style={{ fontSize: 11, fontWeight: 700, color: rs.color, background: rs.bg, padding: '3px 8px', borderRadius: 100, whiteSpace: 'nowrap' }}>{rs.label}</span>
-                                            {r.reimbursementStatus === 'pending' && (
-                                                <div style={{ display: 'flex', gap: 4 }}>
-                                                    <button
-                                                        title="Approve reimbursement"
-                                                        onClick={() => approveReimbursement(r.id)}
-                                                        style={{ background: 'rgba(16,185,129,0.1)', border: 'none', borderRadius: 6, padding: '5px 7px', cursor: 'pointer', color: '#34d399', display: 'flex', alignItems: 'center' }}
-                                                    >
-                                                        <ThumbsUp size={13} />
-                                                    </button>
-                                                    <button
-                                                        title="Reject reimbursement"
-                                                        onClick={() => rejectReimbursement(r.id)}
-                                                        style={{ background: 'rgba(239,68,68,0.1)', border: 'none', borderRadius: 6, padding: '5px 7px', cursor: 'pointer', color: '#f87171', display: 'flex', alignItems: 'center' }}
-                                                    >
-                                                        <ThumbsDown size={13} />
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
+                                        <select
+                                            value={r.status}
+                                            onChange={e => handleStatusChange(r.id, e.target.value)}
+                                            style={{
+                                                background: ss.bg,
+                                                color: ss.color,
+                                                border: 'none',
+                                                borderRadius: 6,
+                                                padding: '4px 8px',
+                                                fontSize: 12,
+                                                fontWeight: 700,
+                                                cursor: 'pointer',
+                                                fontFamily: 'inherit',
+                                            }}
+                                        >
+                                            {Object.entries(statusLabel).map(([val, lbl]) => (
+                                                <option key={val} value={val} style={{ background: '#0f1829', color: '#f1f5f9' }}>{lbl}</option>
+                                            ))}
+                                        </select>
                                     </td>
                                 </tr>
                             )
                         })}
                         {filtered.length === 0 && (
-                            <tr><td colSpan={10} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No maintenance records found</td></tr>
+                            <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No maintenance records found</td></tr>
                         )}
                     </tbody>
                 </table>
+                )}
             </div>
-
-            {/* Bill preview modal */}
-            {billPreview && (
-                <div
-                    onClick={() => setBillPreview(null)}
-                    style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
-                >
-                    <div
-                        onClick={e => e.stopPropagation()}
-                        style={{ background: '#0f1829', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 18, padding: 24, maxWidth: 700, width: '100%', maxHeight: '85vh', display: 'flex', flexDirection: 'column', gap: 16 }}
-                    >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <div style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9' }}>{billPreview.name || 'Bill Preview'}</div>
-                            <div style={{ display: 'flex', gap: 10 }}>
-                                <a href={billPreview.url} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#60a5fa', fontWeight: 600 }}>Open in new tab</a>
-                                <button onClick={() => setBillPreview(null)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 20, lineHeight: 1 }}>×</button>
-                            </div>
-                        </div>
-                        <div style={{ flex: 1, overflow: 'auto', borderRadius: 10, background: '#0a1422', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
-                            {billPreview.name?.endsWith('.pdf') ? (
-                                <iframe src={billPreview.url} title="Bill" style={{ width: '100%', height: 500, border: 'none', borderRadius: 10 }} />
-                            ) : (
-                                <img src={billPreview.url} alt="Bill" style={{ maxWidth: '100%', maxHeight: 500, borderRadius: 10, objectFit: 'contain' }} />
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     )
 }

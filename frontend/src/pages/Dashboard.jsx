@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, Legend
@@ -7,20 +7,10 @@ import {
     Truck, Users, Route, AlertTriangle, TrendingUp,
     CheckCircle, Wrench, DollarSign, Activity
 } from 'lucide-react'
-import { vehicles, drivers, trips, weeklyTrips, getDaysUntilExpiry } from '../data/mockData'
+import { getDashboardKpisApi } from '../api/dashboard'
+import { weeklyTrips } from '../data/mockData'
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#6b7280']
-
-const fleetStatus = [
-    { name: 'Available', value: vehicles.filter(v => v.status === 'available').length },
-    { name: 'In Use', value: vehicles.filter(v => v.status === 'in_use').length },
-    { name: 'Maintenance', value: vehicles.filter(v => v.status === 'maintenance').length },
-]
-
-const activeTrips = trips.filter(t => t.status === 'in_progress').length
-const expiredLicenses = drivers.filter(d => getDaysUntilExpiry(d.licenseExpiry) <= 0)
-const expiringLicenses = drivers.filter(d => { const d2 = getDaysUntilExpiry(d.licenseExpiry); return d2 > 0 && d2 <= 90 })
-const maintenanceVehicles = vehicles.filter(v => v.status === 'maintenance')
 
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload?.length) {
@@ -36,40 +26,52 @@ const CustomTooltip = ({ active, payload, label }) => {
     return null
 }
 
-const activityFeed = [
-    { dot: 'green', text: <><strong>Trip T001</strong> dispatched – Ahmedabad → Surat</>, time: '10 min ago' },
-    { dot: 'blue', text: <><strong>V003</strong> sent for Engine Overhaul maintenance</>, time: '2 hrs ago' },
-    { dot: 'amber', text: <>Driver <strong>Suresh Kumar</strong>'s license expires in 62 days</>, time: '4 hrs ago' },
-    { dot: 'green', text: <><strong>Trip T003</strong> completed successfully</>, time: 'Yesterday' },
-    { dot: 'red', text: <><strong>Trip T008</strong> cancelled – client request</>, time: '2 days ago' },
-    { dot: 'blue', text: <>New vehicle <strong>V008</strong> added to fleet</>, time: '3 days ago' },
-]
+const fmt = (n) => (n === undefined || n === null ? '—' : Number(n).toLocaleString('en-IN'))
 
 export default function Dashboard() {
+    const [kpis, setKpis] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [fetchError, setFetchError] = useState('')
+
+    useEffect(() => {
+        getDashboardKpisApi()
+            .then(setKpis)
+            .catch(e => setFetchError(e.message))
+            .finally(() => setLoading(false))
+    }, [])
+
+    if (loading) return <div style={{ color: 'var(--text-secondary)', padding: 32 }}>Loading dashboard…</div>
+    if (fetchError) return <div className="alert-banner danger"><AlertTriangle size={17} /><div><strong>Failed to load KPIs:</strong> {fetchError}</div></div>
+
+    const fleet = kpis?.fleet || {}
+    const driversKpi = kpis?.drivers || {}
+    const tripsKpi = kpis?.trips || {}
+    const financial = kpis?.financial || {}
+    const maintenance = kpis?.maintenance_insights || {}
+
+    const fleetStatus = [
+        { name: 'Available', value: fleet.available || 0 },
+        { name: 'Active', value: fleet.active || 0 },
+        { name: 'Maintenance', value: fleet.in_maintenance || 0 },
+    ]
+
+    const activityFeed = [
+        { dot: 'green', text: <><strong>{tripsKpi.in_progress || 0}</strong> trip(s) currently in progress</>, time: 'live' },
+        { dot: 'blue', text: <><strong>{maintenance.pending || 0}</strong> maintenance request(s) pending</>, time: 'live' },
+        { dot: 'amber', text: <><strong>{driversKpi.unavailable || 0}</strong> driver(s) off duty</>, time: 'live' },
+        { dot: 'green', text: <><strong>{tripsKpi.completed || 0}</strong> total trip(s) completed</>, time: 'all time' },
+        { dot: 'cyan', text: <>Fleet utilization at <strong>{fleet.utilization_percent ?? 0}%</strong></>, time: 'today' },
+    ]
+
     return (
         <div>
-            {/* Alerts */}
-            {expiredLicenses.length > 0 && (
-                <div className="alert-banner danger">
-                    <AlertTriangle size={17} style={{ flexShrink: 0, marginTop: 1 }} />
-                    <div>
-                        <strong>License Expired:</strong> {expiredLicenses.map(d => d.name).join(', ')} — these drivers cannot be assigned to trips.
-                    </div>
-                </div>
-            )}
-            {expiringLicenses.length > 0 && (
+            {/* Maintenance alert */}
+            {maintenance.pending > 0 && (
                 <div className="alert-banner warning">
-                    <AlertTriangle size={17} style={{ flexShrink: 0, marginTop: 1 }} />
-                    <div>
-                        <strong>Licenses Expiring Soon:</strong> {expiringLicenses.map(d => `${d.name} (${getDaysUntilExpiry(d.licenseExpiry)} days)`).join(' · ')}
-                    </div>
-                </div>
-            )}
-            {maintenanceVehicles.length > 0 && (
-                <div className="alert-banner info">
                     <Wrench size={17} style={{ flexShrink: 0, marginTop: 1 }} />
                     <div>
-                        <strong>Under Maintenance:</strong> {maintenanceVehicles.map(v => v.regNo).join(', ')} — unavailable for dispatch.
+                        <strong>{maintenance.pending} maintenance request(s) pending approval</strong>
+                        {maintenance.most_common_type && <> · Most common issue: <em>{maintenance.most_common_type}</em></>}
                     </div>
                 </div>
             )}
@@ -79,60 +81,60 @@ export default function Dashboard() {
                 <div className="stat-card">
                     <div className="stat-icon blue"><Truck size={24} /></div>
                     <div className="stat-info">
-                        <div className="stat-value">{vehicles.length}</div>
+                        <div className="stat-value">{fmt(fleet.total)}</div>
                         <div className="stat-label">Total Vehicles</div>
                         <div className="stat-trend up">
-                            <TrendingUp size={11} /> {vehicles.filter(v => v.status === 'available').length} available
+                            <TrendingUp size={11} /> {fleet.available ?? 0} available
                         </div>
                     </div>
                 </div>
                 <div className="stat-card">
                     <div className="stat-icon green"><Route size={24} /></div>
                     <div className="stat-info">
-                        <div className="stat-value">{activeTrips}</div>
+                        <div className="stat-value">{fmt(tripsKpi.in_progress)}</div>
                         <div className="stat-label">Active Trips</div>
                         <div className="stat-trend neutral">
-                            <Activity size={11} /> {trips.filter(t => t.status === 'scheduled').length} scheduled
+                            <Activity size={11} /> {tripsKpi.total ?? 0} total
                         </div>
                     </div>
                 </div>
                 <div className="stat-card">
                     <div className="stat-icon purple"><Users size={24} /></div>
                     <div className="stat-info">
-                        <div className="stat-value">{drivers.length}</div>
+                        <div className="stat-value">{fmt(driversKpi.total)}</div>
                         <div className="stat-label">Registered Drivers</div>
                         <div className="stat-trend up">
-                            <CheckCircle size={11} /> {drivers.filter(d => d.status === 'available').length} available
+                            <CheckCircle size={11} /> {driversKpi.available ?? 0} available
                         </div>
                     </div>
                 </div>
                 <div className="stat-card">
                     <div className="stat-icon amber"><Wrench size={24} /></div>
                     <div className="stat-info">
-                        <div className="stat-value">{maintenanceVehicles.length}</div>
+                        <div className="stat-value">{fmt(fleet.in_maintenance)}</div>
                         <div className="stat-label">In Maintenance</div>
                         <div className="stat-trend down">
-                            <AlertTriangle size={11} /> {expiredLicenses.length + expiringLicenses.length} compliance alerts
+                            <AlertTriangle size={11} /> {maintenance.pending ?? 0} pending requests
                         </div>
                     </div>
                 </div>
                 <div className="stat-card">
                     <div className="stat-icon cyan"><DollarSign size={24} /></div>
                     <div className="stat-info">
-                        <div className="stat-value">₹52,359</div>
-                        <div className="stat-label">Expenses This Month</div>
+                        <div className="stat-value">₹{fmt(financial.maintenance_cost)}</div>
+                        <div className="stat-label">Maintenance Cost</div>
                         <div className="stat-trend down">
-                            <TrendingUp size={11} style={{ transform: 'scaleY(-1)' }} /> 18% vs last month
+                            <TrendingUp size={11} style={{ transform: 'scaleY(-1)' }} /> Net profit ₹{fmt(financial.profit)}
                         </div>
                     </div>
                 </div>
                 <div className="stat-card">
                     <div className="stat-icon green"><CheckCircle size={24} /></div>
                     <div className="stat-info">
-                        <div className="stat-value">{trips.filter(t => t.status === 'completed').length}</div>
+                        <div className="stat-value">{fmt(tripsKpi.completed)}</div>
                         <div className="stat-label">Completed Trips</div>
                         <div className="stat-trend up">
-                            <TrendingUp size={11} /> 82% fleet utilization
+                            <TrendingUp size={11} /> {fleet.utilization_percent ?? 0}% fleet utilization
                         </div>
                     </div>
                 </div>
@@ -169,9 +171,20 @@ export default function Dashboard() {
                 </div>
             </div>
 
+            {/* Revenue summary */}
+            <div className="card" style={{ marginBottom: 24 }}>
+                <div className="card-title"><DollarSign size={14} /> Revenue Summary</div>
+                <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', padding: '8px 0' }}>
+                    <div><div style={{ color: 'var(--text-secondary)', fontSize: 12 }}>Total Revenue</div><div style={{ fontSize: 22, fontWeight: 700, color: '#34d399' }}>₹{fmt(tripsKpi.revenue)}</div></div>
+                    <div><div style={{ color: 'var(--text-secondary)', fontSize: 12 }}>Avg per Trip</div><div style={{ fontSize: 22, fontWeight: 700, color: '#60a5fa' }}>₹{fmt(tripsKpi.avg_revenue_per_trip)}</div></div>
+                    <div><div style={{ color: 'var(--text-secondary)', fontSize: 12 }}>Avg Distance</div><div style={{ fontSize: 22, fontWeight: 700, color: '#fbbf24' }}>{fmt(tripsKpi.avg_distance_km)} km</div></div>
+                    <div><div style={{ color: 'var(--text-secondary)', fontSize: 12 }}>Net Profit</div><div style={{ fontSize: 22, fontWeight: 700, color: (financial.profit ?? 0) >= 0 ? '#34d399' : '#f87171' }}>₹{fmt(financial.profit)}</div></div>
+                </div>
+            </div>
+
             {/* Activity feed */}
             <div className="card">
-                <div className="card-title"><Activity size={14} /> Recent Activity</div>
+                <div className="card-title"><Activity size={14} /> Live Metrics</div>
                 <div className="activity-list">
                     {activityFeed.map((a, i) => (
                         <div key={i} className="activity-item">

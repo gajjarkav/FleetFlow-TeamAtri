@@ -56,6 +56,10 @@ def change_my_status(
         raise HTTPException(status_code=403, detail="only dispatcher can update status")
     return update_dispatcher_status(db, current_user, data.duty_status)
 
+@router.get('/me', response_model=UserOut)
+def get_me(current_user=Depends(get_current_user)):
+    return current_user
+
 @router.delete('/dispatchers/{user_id}')
 def remove_dispatcher(
     user_id: int,

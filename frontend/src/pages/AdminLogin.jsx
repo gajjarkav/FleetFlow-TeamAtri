@@ -18,8 +18,7 @@ export default function AdminLogin() {
         e.preventDefault()
         setLoading(true)
         setError('')
-        await new Promise(r => setTimeout(r, 400))
-        const result = loginAsAdmin(email, password)
+        const result = await loginAsAdmin(email, password)
         setLoading(false)
         if (!result.success) { setError(result.error); return }
         navigate('/dashboard')

@@ -19,9 +19,7 @@ export default function Login() {
         if (!email || !password) { setError('Please fill in all fields.'); return }
         setLoading(true)
         setError('')
-        // Short artificial delay for UX feel
-        await new Promise(r => setTimeout(r, 400))
-        const result = login(email, password)
+        const result = await login(email, password)
         setLoading(false)
         if (!result.success) { setError(result.error); return }
         if (result.role === 'admin') navigate('/dashboard')

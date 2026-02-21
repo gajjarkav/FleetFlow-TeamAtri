@@ -1,34 +1,93 @@
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useState, useEffect } from 'react'
+import { loginApi } from '../api/auth'
+import { setToken, clearToken, getToken, TOKEN_KEY } from '../api/client'
 
 const AuthContext = createContext(null)
+const USER_KEY = 'ff_user'
 
-const makeUser = (email, role) => ({
-    id: `U_${Date.now()}`,
-    email,
-    role,
-    name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-    avatar: email.slice(0, 2).toUpperCase(),
-    driverId: 'D001',
-})
+/** Map backend role → frontend role */
+const mapRole = (backendRole) =>
+    backendRole === 'manager' ? 'admin' : 'staff'
+
+/** Restore persisted user on page reload */
+const loadPersistedUser = () => {
+    try {
+        const raw = localStorage.getItem(USER_KEY)
+        return raw ? JSON.parse(raw) : null
+    } catch {
+        return null
+    }
+}
 
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null)
+    const [user, setUser] = useState(loadPersistedUser)
 
-    /** Staff login — any credentials accepted, role = 'staff' */
-    const login = (email, password) => {
+    /** Persist / clear user alongside token */
+    const persistUser = (u) => {
+        if (u) {
+            localStorage.setItem(USER_KEY, JSON.stringify(u))
+        } else {
+            localStorage.removeItem(USER_KEY)
+        }
+        setUser(u)
+    }
+
+    /**
+     * Dispatcher (Staff) login → POST /auth/login
+     * Backend returns { token, role: 'dispatcher' }
+     */
+    const login = async (email, password) => {
         if (!email || !password) return { success: false, error: 'Please fill in all fields.' }
-        setUser(makeUser(email, 'staff'))
-        return { success: true, role: 'staff' }
+        try {
+            const data = await loginApi(email, password)
+            if (data.role !== 'dispatcher') {
+                return { success: false, error: 'Use the Admin panel for manager accounts.' }
+            }
+            setToken(data.token)
+            const u = {
+                email,
+                role: 'staff',
+                backendRole: data.role,
+                name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+                avatar: email.slice(0, 2).toUpperCase(),
+            }
+            persistUser(u)
+            return { success: true, role: 'staff' }
+        } catch (err) {
+            return { success: false, error: err.message || 'Login failed.' }
+        }
     }
 
-    /** Admin login — any credentials accepted, role = 'admin' */
-    const loginAsAdmin = (email, password) => {
+    /**
+     * Manager (Admin) login → POST /auth/login
+     * Backend returns { token, role: 'manager' }
+     */
+    const loginAsAdmin = async (email, password) => {
         if (!email || !password) return { success: false, error: 'All fields required.' }
-        setUser(makeUser(email, 'admin'))
-        return { success: true, role: 'admin' }
+        try {
+            const data = await loginApi(email, password)
+            if (data.role !== 'manager') {
+                return { success: false, error: 'This account does not have manager access.' }
+            }
+            setToken(data.token)
+            const u = {
+                email,
+                role: 'admin',
+                backendRole: data.role,
+                name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+                avatar: email.slice(0, 2).toUpperCase(),
+            }
+            persistUser(u)
+            return { success: true, role: 'admin' }
+        } catch (err) {
+            return { success: false, error: err.message || 'Login failed.' }
+        }
     }
 
-    const logout = () => setUser(null)
+    const logout = () => {
+        clearToken()
+        persistUser(null)
+    }
 
     const isAdmin = user?.role === 'admin'
     const isStaff = user?.role === 'staff'

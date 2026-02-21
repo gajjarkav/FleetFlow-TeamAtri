@@ -1,58 +1,95 @@
-import React, { useState } from 'react'
-import { Truck, Plus, Search, Fuel, Gauge, Calendar, AlertTriangle } from 'lucide-react'
+﻿import React, { useState, useEffect } from 'react'
+import { Truck, Plus, Search, Gauge, AlertTriangle, Trash2, RefreshCw } from 'lucide-react'
 import Modal from '../components/Modal'
-import { vehicles as initialVehicles } from '../data/mockData'
+import { listVehiclesApi, createVehicleApi, updateVehicleApi, deleteVehicleApi } from '../api/vehicles'
 
-const statusLabel = { available: 'Available', in_use: 'In Use', maintenance: 'Maintenance' }
+// Backend status values: available | on_trip | in_shop | retired
+const statusLabel = { available: 'Available', on_trip: 'On Trip', in_shop: 'In Shop', retired: 'Retired' }
+const statusFilters = ['all', 'available', 'on_trip', 'in_shop', 'retired']
+const categories = ['Light Truck', 'Pickup', 'Medium Truck', 'Heavy Truck', 'Mini Bus', 'Van', 'Other']
 
-const defaultForm = { regNo: '', make: '', model: '', year: '', type: 'Light Truck', capacity: '', fuelType: 'Diesel', odometer: '' }
-const vehicleTypes = ['Light Truck', 'Pickup', 'Medium Truck', 'Heavy Truck', 'Mini Bus', 'Van']
-const fuelTypes = ['Diesel', 'Petrol', 'CNG', 'Electric']
-const statusFilters = ['all', 'available', 'in_use', 'maintenance']
+const defaultForm = { name: '', category: categories[0], plate_number: '', region: '', capacity_kg: '', odometer: '' }
 
 export default function Vehicles() {
-    const [vehicles, setVehicles] = useState(initialVehicles)
+    const [vehicles, setVehicles] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [fetchError, setFetchError] = useState('')
     const [filter, setFilter] = useState('all')
     const [search, setSearch] = useState('')
     const [showModal, setShowModal] = useState(false)
     const [form, setForm] = useState(defaultForm)
     const [errors, setErrors] = useState({})
+    const [saving, setSaving] = useState(false)
+
+    const load = () => {
+        setLoading(true)
+        listVehiclesApi()
+            .then(setVehicles)
+            .catch(e => setFetchError(e.message))
+            .finally(() => setLoading(false))
+    }
+
+    useEffect(load, [])
 
     const filtered = vehicles.filter(v => {
         const matchStatus = filter === 'all' || v.status === filter
         const q = search.toLowerCase()
-        const matchSearch = !q || v.regNo.toLowerCase().includes(q) || v.make.toLowerCase().includes(q) || v.model.toLowerCase().includes(q)
+        const matchSearch = !q || v.plate_number.toLowerCase().includes(q) || v.name.toLowerCase().includes(q) || v.region.toLowerCase().includes(q)
         return matchStatus && matchSearch
     })
 
     const validate = () => {
         const e = {}
-        if (!form.regNo.trim()) e.regNo = 'Registration number is required'
-        if (!form.make.trim()) e.make = 'Make is required'
-        if (!form.model.trim()) e.model = 'Model is required'
-        if (!form.year || +form.year < 2000 || +form.year > 2026) e.year = 'Valid year required'
-        if (!form.capacity || +form.capacity <= 0) e.capacity = 'Capacity must be > 0 kg'
-        if (!form.odometer || +form.odometer < 0) e.odometer = 'Odometer reading required'
+        if (!form.name.trim()) e.name = 'Vehicle name is required'
+        if (!form.plate_number.trim()) e.plate_number = 'Plate number is required'
+        if (!form.region.trim()) e.region = 'Region is required'
+        if (!form.capacity_kg || +form.capacity_kg <= 0) e.capacity_kg = 'Capacity must be > 0 kg'
+        if (form.odometer === '' || +form.odometer < 0) e.odometer = 'Odometer reading required'
         return e
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const e = validate()
         if (Object.keys(e).length) { setErrors(e); return }
-        const newV = {
-            id: `V${String(vehicles.length + 1).padStart(3, '0')}`,
-            ...form,
-            year: +form.year,
-            capacity: +form.capacity,
-            odometer: +form.odometer,
-            status: 'available',
-            lastService: '—',
-            nextService: '—',
+        setSaving(true)
+        try {
+            const created = await createVehicleApi({
+                name: form.name.trim(),
+                category: form.category,
+                plate_number: form.plate_number.trim(),
+                region: form.region.trim(),
+                capacity_kg: +form.capacity_kg,
+                odometer: +form.odometer,
+                status: 'available',
+            })
+            setVehicles(prev => [created, ...prev])
+            setShowModal(false)
+            setForm(defaultForm)
+            setErrors({})
+        } catch (err) {
+            setErrors({ _api: err.message })
+        } finally {
+            setSaving(false)
         }
-        setVehicles(prev => [newV, ...prev])
-        setShowModal(false)
-        setForm(defaultForm)
-        setErrors({})
+    }
+
+    const handleStatusChange = async (id, newStatus) => {
+        try {
+            const updated = await updateVehicleApi(id, { status: newStatus })
+            setVehicles(prev => prev.map(v => v.id === id ? updated : v))
+        } catch (err) {
+            alert('Failed to update status: ' + err.message)
+        }
+    }
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Delete this vehicle?')) return
+        try {
+            await deleteVehicleApi(id)
+            setVehicles(prev => prev.filter(v => v.id !== id))
+        } catch (err) {
+            alert('Failed to delete: ' + err.message)
+        }
     }
 
     const f = (k) => (e) => { setForm(p => ({ ...p, [k]: e.target.value })); setErrors(p => ({ ...p, [k]: undefined })) }
@@ -64,10 +101,15 @@ export default function Vehicles() {
                     <h1>Vehicles</h1>
                     <p>Manage your fleet vehicles, statuses, and specifications</p>
                 </div>
-                <button className="btn btn-primary" onClick={() => { setShowModal(true); setForm(defaultForm); setErrors({}) }}>
-                    <Plus size={16} /> Add Vehicle
-                </button>
+                <div style={{ display: 'flex', gap: 10 }}>
+                    <button className="btn btn-secondary" onClick={load} title="Refresh"><RefreshCw size={15} /></button>
+                    <button className="btn btn-primary" onClick={() => { setShowModal(true); setForm(defaultForm); setErrors({}) }}>
+                        <Plus size={16} /> Add Vehicle
+                    </button>
+                </div>
             </div>
+
+            {fetchError && <div className="alert-banner danger"><AlertTriangle size={17} /><div>{fetchError}</div></div>}
 
             {/* Filters */}
             <div className="flex items-center gap-3 mb-4" style={{ flexWrap: 'wrap' }}>
@@ -84,42 +126,55 @@ export default function Vehicles() {
                 </div>
             </div>
 
-            {/* Vehicle Grid */}
+            {loading ? (
+                <div style={{ color: 'var(--text-secondary)', padding: 32 }}>Loading vehiclesâ€¦</div>
+            ) : (
             <div className="vehicle-grid">
                 {filtered.map(v => (
                     <div key={v.id} className={`vehicle-card ${v.status}`}>
                         <div className="vehicle-card-header">
-                            <div className="vehicle-icon-wrap">
-                                <Truck size={22} />
-                            </div>
-                            <span className={`badge ${v.status}`}>{statusLabel[v.status]}</span>
+                            <div className="vehicle-icon-wrap"><Truck size={22} /></div>
+                            <span className={`badge ${v.status}`}>{statusLabel[v.status] || v.status}</span>
                         </div>
-                        <div className="vehicle-reg">{v.regNo}</div>
-                        <div className="vehicle-model">{v.make} {v.model} · {v.year} · {v.type}</div>
+                        <div className="vehicle-reg">{v.plate_number}</div>
+                        <div className="vehicle-model">{v.name} Â· {v.category} Â· {v.region}</div>
 
-                        {v.status === 'maintenance' && (
+                        {v.status === 'in_shop' && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10, fontSize: 12, color: 'var(--warning)' }}>
-                                <AlertTriangle size={13} /> Under maintenance – not available for dispatch
+                                <AlertTriangle size={13} /> Under maintenance â€“ not available for dispatch
                             </div>
                         )}
 
                         <div className="vehicle-stats">
                             <div className="vehicle-stat-item">
                                 <span className="vehicle-stat-label"><Gauge size={9} style={{ display: 'inline' }} /> Capacity</span>
-                                <span className="vehicle-stat-value">{v.capacity.toLocaleString()} kg</span>
-                            </div>
-                            <div className="vehicle-stat-item">
-                                <span className="vehicle-stat-label"><Fuel size={9} style={{ display: 'inline' }} /> Fuel</span>
-                                <span className="vehicle-stat-value">{v.fuelType}</span>
+                                <span className="vehicle-stat-value">{v.capacity_kg.toLocaleString()} kg</span>
                             </div>
                             <div className="vehicle-stat-item">
                                 <span className="vehicle-stat-label">Odometer</span>
                                 <span className="vehicle-stat-value">{v.odometer.toLocaleString()} km</span>
                             </div>
                             <div className="vehicle-stat-item">
-                                <span className="vehicle-stat-label"><Calendar size={9} style={{ display: 'inline' }} /> Next Service</span>
-                                <span className="vehicle-stat-value" style={{ fontSize: 11 }}>{v.nextService}</span>
+                                <span className="vehicle-stat-label">Region</span>
+                                <span className="vehicle-stat-value">{v.region}</span>
                             </div>
+                        </div>
+
+                        {/* Status change + delete controls */}
+                        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                            <select
+                                className="form-control"
+                                style={{ flex: 1, fontSize: 12, padding: '4px 8px', height: 30 }}
+                                value={v.status}
+                                onChange={e => handleStatusChange(v.id, e.target.value)}
+                            >
+                                {Object.entries(statusLabel).map(([val, lbl]) => <option key={val} value={val}>{lbl}</option>)}
+                            </select>
+                            <button
+                                onClick={() => handleDelete(v.id)}
+                                style={{ background: 'rgba(239,68,68,0.12)', border: 'none', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', color: '#f87171' }}
+                                title="Delete"
+                            ><Trash2 size={14} /></button>
                         </div>
                     </div>
                 ))}
@@ -133,52 +188,45 @@ export default function Vehicles() {
                     </div>
                 )}
             </div>
+            )}
 
             {/* Add Vehicle Modal */}
             {showModal && (
                 <Modal title="Add New Vehicle" onClose={() => setShowModal(false)}
                     footer={<>
                         <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                        <button className="btn btn-primary" onClick={handleSubmit}><Plus size={15} /> Add Vehicle</button>
+                        <button className="btn btn-primary" onClick={handleSubmit} disabled={saving}>
+                            <Plus size={15} /> {saving ? 'Savingâ€¦' : 'Add Vehicle'}
+                        </button>
                     </>}
                 >
                     <div className="form-grid">
+                        {errors._api && <div className="form-error" style={{ gridColumn: '1/-1' }}>{errors._api}</div>}
                         <div className="form-group">
-                            <label className="form-label">Registration Number *</label>
-                            <input className={`form-control${errors.regNo ? ' error' : ''}`} placeholder="GJ-01-AA-0000" value={form.regNo} onChange={f('regNo')} />
-                            {errors.regNo && <span className="form-error">{errors.regNo}</span>}
+                            <label className="form-label">Vehicle Name *</label>
+                            <input className={`form-control${errors.name ? ' error' : ''}`} placeholder="e.g. Tata Ace Gold" value={form.name} onChange={f('name')} />
+                            {errors.name && <span className="form-error">{errors.name}</span>}
                         </div>
                         <div className="form-group">
-                            <label className="form-label">Vehicle Type</label>
-                            <select className="form-control" value={form.type} onChange={f('type')}>
-                                {vehicleTypes.map(t => <option key={t}>{t}</option>)}
+                            <label className="form-label">Category</label>
+                            <select className="form-control" value={form.category} onChange={f('category')}>
+                                {categories.map(c => <option key={c}>{c}</option>)}
                             </select>
                         </div>
                         <div className="form-group">
-                            <label className="form-label">Make *</label>
-                            <input className={`form-control${errors.make ? ' error' : ''}`} placeholder="e.g. Tata Motors" value={form.make} onChange={f('make')} />
-                            {errors.make && <span className="form-error">{errors.make}</span>}
+                            <label className="form-label">Plate Number *</label>
+                            <input className={`form-control${errors.plate_number ? ' error' : ''}`} placeholder="GJ-01-AA-0000" value={form.plate_number} onChange={f('plate_number')} />
+                            {errors.plate_number && <span className="form-error">{errors.plate_number}</span>}
                         </div>
                         <div className="form-group">
-                            <label className="form-label">Model *</label>
-                            <input className={`form-control${errors.model ? ' error' : ''}`} placeholder="e.g. Ace Gold" value={form.model} onChange={f('model')} />
-                            {errors.model && <span className="form-error">{errors.model}</span>}
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Year *</label>
-                            <input className={`form-control${errors.year ? ' error' : ''}`} type="number" placeholder="2023" value={form.year} onChange={f('year')} />
-                            {errors.year && <span className="form-error">{errors.year}</span>}
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Fuel Type</label>
-                            <select className="form-control" value={form.fuelType} onChange={f('fuelType')}>
-                                {fuelTypes.map(f => <option key={f}>{f}</option>)}
-                            </select>
+                            <label className="form-label">Region / Base *</label>
+                            <input className={`form-control${errors.region ? ' error' : ''}`} placeholder="e.g. Ahmedabad" value={form.region} onChange={f('region')} />
+                            {errors.region && <span className="form-error">{errors.region}</span>}
                         </div>
                         <div className="form-group">
                             <label className="form-label">Cargo Capacity (kg) *</label>
-                            <input className={`form-control${errors.capacity ? ' error' : ''}`} type="number" placeholder="1000" value={form.capacity} onChange={f('capacity')} />
-                            {errors.capacity && <span className="form-error">{errors.capacity}</span>}
+                            <input className={`form-control${errors.capacity_kg ? ' error' : ''}`} type="number" placeholder="1000" value={form.capacity_kg} onChange={f('capacity_kg')} />
+                            {errors.capacity_kg && <span className="form-error">{errors.capacity_kg}</span>}
                         </div>
                         <div className="form-group">
                             <label className="form-label">Odometer (km) *</label>
