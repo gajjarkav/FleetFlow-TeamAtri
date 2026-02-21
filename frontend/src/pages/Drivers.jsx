@@ -71,7 +71,7 @@ export default function Drivers() {
             </div>
 
             {/* Compliance Summary */}
-            <div className="stat-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginBottom: 24 }}>
+            <div className="stat-grid" style={{ marginBottom: 24 }}>
                 {[
                     { label: 'Total Drivers', value: drivers.length, cls: 'blue' },
                     { label: 'Available', value: drivers.filter(d => d.status === 'available').length, cls: 'green' },

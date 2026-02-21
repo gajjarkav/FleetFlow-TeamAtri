@@ -93,7 +93,7 @@ export default function Trips() {
             </div>
 
             {/* Stats row */}
-            <div className="stat-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', marginBottom: 24 }}>
+            <div className="stat-grid" style={{ marginBottom: 24 }}>
                 {Object.entries({ 'In Progress': 'in_progress', 'Scheduled': 'scheduled', 'Completed': 'completed', 'Cancelled': 'cancelled' }).map(([label, st]) => (
                     <div key={st} className="stat-card" style={{ cursor: 'pointer' }} onClick={() => setStatusFilter(st)}>
                         <div className="stat-info">

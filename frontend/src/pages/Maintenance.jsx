@@ -63,7 +63,7 @@ export default function Maintenance() {
             )}
 
             {/* Summary cards */}
-            <div className="stat-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', marginBottom: 24 }}>
+            <div className="stat-grid" style={{ marginBottom: 24 }}>
                 {[
                     { label: 'Scheduled', count: records.filter(r => r.status === 'scheduled').length, cls: 'amber', Icon: Clock },
                     { label: 'In Progress', count: records.filter(r => r.status === 'in_progress').length, cls: 'blue', Icon: Wrench },
