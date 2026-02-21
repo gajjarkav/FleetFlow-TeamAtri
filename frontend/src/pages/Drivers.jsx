@@ -123,7 +123,7 @@ export default function Drivers() {
             {fetchError && <div className="alert-banner danger"><AlertTriangle size={17} /><div>{fetchError}</div></div>}
 
             {/* Compliance Summary */}
-            <div className="stat-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginBottom: 24 }}>
+            <div className="stat-grid" style={{ marginBottom: 24 }}>
                 {[
                     { label: 'Total Dispatchers', value: drivers.length, cls: 'blue' },
                     { label: 'Available', value: drivers.filter(d => d.duty_status === 'available').length, cls: 'green' },

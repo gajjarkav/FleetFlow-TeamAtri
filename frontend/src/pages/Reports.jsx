@@ -56,7 +56,7 @@ export default function Reports() {
             </div>
 
             {/* Summary KPIs */}
-            <div className="stat-grid" style={{ marginBottom: 24, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+            <div className="stat-grid" style={{ marginBottom: 24 }}>
                 {[
                     { label: 'Fleet Utilization', value: '82%', sub: 'This month', cls: 'green' },
                     { label: 'Total km Driven', value: `${totalKm.toLocaleString()} km`, sub: 'Completed trips', cls: 'blue' },
