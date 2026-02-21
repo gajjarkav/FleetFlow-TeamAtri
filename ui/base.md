@@ -24,3 +24,12 @@ Search & Filter Data
 Generate Reports
 Admin Dashboard
 Notification System
+
+Recommended Report & Graph Concepts
+Fleet Utilization (Time-based): A bar chart comparing "Active Driving Time" vs. "Idle/Maintenance Time" to see how efficiently vehicles are being used.
+Trip Completion Efficiency: A line graph showing "Estimated vs. Actual Arrival Times" over the last 30 days.
+Expense Distribution: A pie chart breaking down costs by category (Maintenance, Tolls, Repairs, and Driver Payouts).
+Safety & Compliance Scorecard: A radar chart (spider web) for drivers showing Safety Score, On-time delivery, Documentation Accuracy, and Vehicle Care.
+Maintenance Forecast: A predictive bar graph showing which vehicles are approaching their service milestones (Odometer-based).
+Revenue vs. Expense per Vehicle: A grouped bar chart to identify the most (and least) profitable assets in the fleet.
+
