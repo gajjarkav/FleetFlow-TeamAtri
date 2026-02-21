@@ -12,3 +12,12 @@ class User(Base):
     role = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+    name = Column(String, nullable=True)
+    mobile_number = Column(String, nullable=True)
+    license_number = Column(String, nullable=True)
+    license_expiry = Column(DateTime, nullable=True)
+
+    create_at = Column(DateTime, default=datetime.utcnow)
+    duty_status = Column(String, default="available")

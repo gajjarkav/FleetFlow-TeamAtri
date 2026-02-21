@@ -7,7 +7,7 @@ from app.services.vehicle import (
     create_vehicle, 
     get_vehicle,
     get_vehicles,
-    update_vehicle,
+    update_vehicle_status,
     delete_vehicle
 )
 
@@ -56,7 +56,7 @@ def update_vehicle_route(
     if not vehicle:
         raise HTTPException(status_code=404, detail="Vehicle not found")
 
-    return update_vehicle(db, vehicle, data)
+    return update_vehicle_status(db, vehicle, data.status)
 
 @router.delete("/{vehicle_id}")
 def delete_vehicle_route(

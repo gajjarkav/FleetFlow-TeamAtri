@@ -11,14 +11,24 @@ def authenticate_user(db: Session, email:str, password: str):
     return user
 
 
-def create_dispatcher(db: Session, email: str, password: str):
+def create_dispatcher(db: Session, data):
     user = User(
-        email=email,
-        password_hash=hash_password(password),
-        role="dispatcher"
+        name=data.name,
+        email=data.email,
+        password_hash=hash_password(data.password),
+        role="dispatcher",
+        mobile_number=data.mobile_number,
+        license_number=data.license_number,
+        license_expiry=data.license_expiry,
     )
 
     db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+def update_dispatcher_status(db: Session, user: Session, status: str):
+    user.duty_status = status
     db.commit()
     db.refresh(user)
     return user

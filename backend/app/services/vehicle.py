@@ -15,13 +15,15 @@ def get_vehicles(db: Session):
 def get_vehicle(db: Session, vehicle_id: int):
     return db.query(Vehicle).filter(Vehicle.id == vehicle_id).first()
 
-def update_vehicle(db: Session, vehicle: Vehicle, data):
+def update_vehicle_status(db: Session, vehicle: Vehicle, data, status: str):
     for field, value in data.dict(exclude_unset=True).items():
         setattr(vehicle, field, value)
 
+    vehicle.status = status
     db.commit()
     db.refresh(vehicle)
     return vehicle
+
 
 
 def delete_vehicle(db: Session, vehicle: Vehicle):

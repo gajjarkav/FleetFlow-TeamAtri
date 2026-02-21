@@ -1,4 +1,12 @@
 from pydantic import BaseModel
+from enum import Enum
+
+
+class VehicleStatus(str, Enum):
+    available = "available"
+    on_trip = "on_trip"
+    in_shop = "in_shop"
+    retired = "retired"
 
 class VehicleBase(BaseModel):
     name: str
@@ -9,7 +17,7 @@ class VehicleBase(BaseModel):
     odometer: int
 
 class VehicleCreate(VehicleBase):
-    pass
+    status: VehicleStatus = VehicleStatus.available
 
 class VehicleUpdate(BaseModel):
     name: str | None = None
@@ -17,11 +25,14 @@ class VehicleUpdate(BaseModel):
     region: str | None = None
     capacity_kg: int | None = None
     odometer: int | None = None
-    status: str | None = None
+    status: VehicleStatus | None = None
+
+class VehicleStatusUpdate(BaseModel):
+    status: VehicleStatus
 
 class VehicleOut(VehicleBase):
     id: int
-    status: str
+    status: VehicleStatus
 
     class Config:
         from_attributes = True

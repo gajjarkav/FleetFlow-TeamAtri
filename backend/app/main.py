@@ -8,6 +8,7 @@ from app.core.security import hash_password
 
 from app.api.auth import router as auth_router
 from app.api.vehicles import router as vehicle_router
+from app.api.trips import router as trip_router
 
 settings = get_settings()
 
@@ -36,6 +37,7 @@ seed_manager()
 
 app.include_router(auth_router)
 app.include_router(vehicle_router)
+app.include_router(trip_router)
 
 
 if __name__ == "__main__":
