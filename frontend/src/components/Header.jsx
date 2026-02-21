@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Bell, Settings, Search, LogOut } from 'lucide-react'
+import { Bell, Settings, Search, LogOut, Menu } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const pageMeta = {
@@ -12,7 +12,7 @@ const pageMeta = {
     '/reports': { title: 'Reports', subtitle: 'Analytics & Fleet Intelligence' },
 }
 
-export default function Header() {
+export default function Header({ onMenuToggle }) {
     const { pathname } = useLocation()
     const { user, logout } = useAuth()
     const navigate = useNavigate()
@@ -31,6 +31,9 @@ export default function Header() {
     return (
         <header className="header">
             <div className="header-left">
+                <button className="header-btn mobile-menu-btn" onClick={onMenuToggle} title="Menu">
+                    <Menu size={18} />
+                </button>
                 <div>
                     <div className="header-title">{meta.title}</div>
                     {meta.subtitle && <div className="header-subtitle">{meta.subtitle}</div>}
@@ -38,14 +41,14 @@ export default function Header() {
             </div>
 
             <div className="header-right">
-                <button className="header-btn" title="Search">
+                <button className="header-btn header-hide-mobile" title="Search">
                     <Search size={17} />
                 </button>
                 <button className="header-btn" title="Notifications">
                     <Bell size={17} />
                     <span className="header-badge">3</span>
                 </button>
-                <button className="header-btn" title="Settings">
+                <button className="header-btn header-hide-mobile" title="Settings">
                     <Settings size={17} />
                 </button>
                 <div className="header-avatar" title={user?.email || 'Fleet Manager'}>{roleBadge}</div>

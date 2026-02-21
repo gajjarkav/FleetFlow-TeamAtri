@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { Truck, LayoutDashboard, Bell, MapPin, Wrench, User, LogOut } from 'lucide-react'
+import { Truck, LayoutDashboard, Bell, MapPin, Wrench, User, LogOut, Menu, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import '../driver.css'
 
@@ -15,6 +15,7 @@ const navItems = [
 export default function DriverLayout() {
     const { user, logout } = useAuth()
     const navigate = useNavigate()
+    const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
     const handleLogout = () => {
         logout()
@@ -33,17 +34,23 @@ export default function DriverLayout() {
                     <span className="driver-nav-brand-text">FLEET<span>FLOW</span></span>
                 </NavLink>
 
+                {/* Mobile hamburger */}
+                <button className="driver-mobile-menu-btn" onClick={() => setMobileNavOpen(p => !p)}>
+                    {mobileNavOpen ? <X size={20} /> : <Menu size={20} />}
+                </button>
+
                 {/* Nav Links */}
-                <div className="driver-nav-links">
+                <div className={`driver-nav-links${mobileNavOpen ? ' open' : ''}`}>
                     {navItems.map(item => (
                         <NavLink
                             key={item.to}
                             to={item.to}
                             end={item.end}
                             className={({ isActive }) => `driver-nav-link${isActive ? ' active' : ''}`}
+                            onClick={() => setMobileNavOpen(false)}
                         >
                             <item.icon size={15} />
-                            {item.label}
+                            <span className="driver-nav-link-text">{item.label}</span>
                             {item.badge > 0 && <span className="nav-badge">{item.badge}</span>}
                         </NavLink>
                     ))}
@@ -60,7 +67,7 @@ export default function DriverLayout() {
                     </div>
                     <button className="driver-logout-btn" onClick={handleLogout}>
                         <LogOut size={14} />
-                        Sign Out
+                        <span className="driver-logout-text">Sign Out</span>
                     </button>
                 </div>
             </nav>

@@ -921,28 +921,312 @@
     letter-spacing: 0.5px;
 }
 
-/* ── Responsive ─────────────────────────── */
-@media (max-width: 768px) {
-    .driver-topnav {
-        padding: 0 16px;
-    }
+/* ── Mobile Menu Button (hidden on desktop) ── */
+.driver-mobile-menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background: rgba(37, 99, 235, 0.06);
+    border: 1px solid rgba(37, 99, 235, 0.12);
+    border-radius: 9px;
+    color: #0F172A;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.18s;
+}
 
-    .driver-nav-links {
-        gap: 0;
-    }
+.driver-mobile-menu-btn:hover {
+    background: rgba(37, 99, 235, 0.12);
+}
 
+/* ── Responsive – Tablet (≤ 1024px) ─────── */
+@media (max-width: 1024px) {
     .driver-nav-link {
         padding: 8px 10px;
-        font-size: 12px;
+        font-size: 13px;
     }
 
     .driver-page {
-        padding: 20px 16px;
+        padding: 24px 20px;
     }
 
+    .driver-hero-card {
+        padding: 22px 24px;
+    }
+
+    .driver-stats-row {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+
+    .invitation-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+
+    .driver-info-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .profile-card {
+        padding: 22px;
+        gap: 18px;
+    }
+
+    .trip-tracker-body { padding: 20px; }
+}
+
+/* ── Responsive – Mobile (≤ 768px) ──────── */
+@media (max-width: 768px) {
+    /* ── Top Nav ── */
+    .driver-topnav {
+        padding: 0 14px;
+        flex-wrap: wrap;
+        height: auto;
+        min-height: 56px;
+        gap: 0;
+    }
+
+    .driver-mobile-menu-btn {
+        display: flex;
+        order: 2;
+    }
+
+    .driver-nav-brand {
+        order: 1;
+        flex: 1;
+    }
+
+    .driver-nav-right {
+        order: 3;
+        gap: 6px;
+    }
+
+    .driver-nav-links {
+        display: none;
+        order: 4;
+        width: 100%;
+        flex-direction: column;
+        padding: 8px 0 12px;
+        border-top: 1px solid rgba(15, 23, 42, 0.06);
+        gap: 2px;
+    }
+
+    .driver-nav-links.open {
+        display: flex;
+    }
+
+    .driver-nav-link {
+        padding: 10px 12px;
+        font-size: 13.5px;
+        border-radius: 10px;
+    }
+
+    .driver-status-pill { display: none; }
+    .driver-logout-text { display: none; }
+    .driver-logout-btn { padding: 7px 10px; }
+
+    .driver-avatar { width: 32px; height: 32px; font-size: 11px; }
+
+    /* ── Page Content ── */
+    .driver-page {
+        padding: 16px 14px;
+    }
+
+    .driver-page-header { margin-bottom: 20px; }
+    .driver-page-header h1 { font-size: 20px; }
+    .driver-page-header p { font-size: 12.5px; }
+
+    /* ── Hero Card ── */
     .driver-hero-card {
         flex-direction: column;
         align-items: flex-start;
         gap: 14px;
+        padding: 20px;
+        border-radius: 14px;
     }
+
+    .driver-hero-left h2 { font-size: 18px; }
+    .driver-hero-left p { font-size: 12px; }
+
+    .driver-hero-status {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+
+    /* ── Stat Cards ── */
+    .driver-stats-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .driver-stat-card {
+        padding: 14px 16px;
+        border-radius: 12px;
+    }
+
+    .driver-stat-card-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+    }
+
+    .driver-stat-value { font-size: 22px; }
+    .driver-stat-label { font-size: 11px; }
+
+    /* ── Quick Actions ── */
+    .quick-action-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .quick-action-card {
+        padding: 14px 12px;
+        border-radius: 12px;
+    }
+
+    .quick-action-icon { width: 38px; height: 38px; }
+    .quick-action-label { font-size: 11.5px; }
+
+    /* ── Invitation Cards ── */
+    .invitation-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .invitation-card-body { padding: 14px 16px; }
+    .invitation-actions { padding: 12px 16px; }
+
+    .invitation-meta {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .invitation-meta-item { padding: 8px 10px; }
+
+    /* ── Trip Tracker ── */
+    .trip-tracker-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 18px 18px;
+    }
+
+    .trip-tracker-body { padding: 18px; }
+
+    .trip-progress-steps {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+        gap: 0;
+    }
+
+    .trip-step-circle { width: 28px; height: 28px; font-size: 11px; }
+    .trip-step-label { font-size: 10px; }
+
+    /* ── Profile Card ── */
+    .profile-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px;
+        border-radius: 14px;
+    }
+
+    .profile-avatar-lg {
+        width: 56px;
+        height: 56px;
+        font-size: 18px;
+        border-radius: 14px;
+    }
+
+    .profile-name { font-size: 18px; }
+
+    /* ── Info Grid ── */
+    .driver-info-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .driver-info-card {
+        padding: 18px;
+        border-radius: 12px;
+    }
+
+    .driver-info-row { font-size: 12px; padding: 8px 0; }
+
+    /* ── Action Button ── */
+    .driver-action-btn {
+        padding: 9px 16px;
+        font-size: 12.5px;
+    }
+
+    /* ── Empty State ── */
+    .driver-empty { padding: 40px 20px; }
+    .driver-empty h3 { font-size: 15px; }
+    .driver-empty p { font-size: 12px; }
+
+    /* ── Access Denied ── */
+    .access-denied-code { font-size: 64px; }
+    .access-denied-title { font-size: 20px; }
+    .access-denied-msg { font-size: 13px; }
+}
+
+/* ── Responsive – Small Phone (≤ 480px) ──── */
+@media (max-width: 480px) {
+    .driver-topnav { padding: 0 10px; min-height: 50px; }
+
+    .driver-nav-brand-text { font-size: 15px; }
+    .driver-nav-brand-icon { width: 30px; height: 30px; }
+
+    .driver-page { padding: 12px 10px; }
+    .driver-page-header h1 { font-size: 18px; }
+
+    .driver-hero-card { padding: 16px; }
+    .driver-hero-left h2 { font-size: 16px; }
+
+    .driver-stats-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .driver-stat-card {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+    }
+
+    .driver-stat-card-icon { margin-bottom: 0; }
+    .driver-stat-value { font-size: 20px; }
+
+    .quick-action-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .quick-action-card { padding: 12px 10px; gap: 8px; }
+    .quick-action-icon { width: 34px; height: 34px; }
+    .quick-action-label { font-size: 11px; }
+
+    .invitation-card-body { padding: 12px 14px; }
+    .invitation-actions { padding: 10px 14px; flex-direction: column; }
+    .invitation-btn-accept,
+    .invitation-btn-decline { padding: 9px; font-size: 12px; }
+
+    .trip-tracker-header { padding: 14px; }
+    .trip-tracker-body { padding: 14px; }
+
+    .profile-card { padding: 16px; }
+    .profile-avatar-lg { width: 48px; height: 48px; font-size: 16px; }
+    .profile-name { font-size: 16px; }
+
+    .driver-info-card { padding: 14px; }
+
+    .access-denied-code { font-size: 52px; }
+    .access-denied-title { font-size: 18px; }
 }
