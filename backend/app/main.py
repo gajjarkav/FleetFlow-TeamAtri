@@ -5,7 +5,9 @@ from app.db.base import Base,  engine, SessionLocal
 from app.core.config import get_settings
 from app.models.user import User
 from app.core.security import hash_password
+
 from app.api.auth import router as auth_router
+from app.api.vehicles import router as vehicle_router
 
 settings = get_settings()
 
@@ -33,6 +35,7 @@ def seed_manager():
 seed_manager()
 
 app.include_router(auth_router)
+app.include_router(vehicle_router)
 
 
 if __name__ == "__main__":
