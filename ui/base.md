@@ -9,3 +9,10 @@ Primary: #1E3A8A (Navy Blue)
 Accent: #2563EB
 Cards: White with soft shadow
 Text: Dark gray #0F172A
+
+For driver dashboard:-
+we will be going to have 
+1.driver name,
+2.phone number,
+3.driving license number,
+4.experince,
