@@ -1,27 +1,28 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { AtSign, Shield, Eye, EyeOff, ArrowRight, Grid2X2 } from 'lucide-react'
+import { ArrowRight, AtSign, Shield, Eye, EyeOff, Grid2X2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import '../auth.css'
 
 export default function AdminLogin() {
-    const { loginAdmin } = useAuth()
+    const { loginAsAdmin } = useAuth()
     const navigate = useNavigate()
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPw, setShowPw] = useState(false)
     const [error, setError] = useState('')
+    const [loading, setLoading] = useState(false)
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
+        setLoading(true)
         setError('')
-        const ok = loginAdmin(email, password)
-        if (ok) {
-            navigate('/dashboard')
-        } else {
-            setError('Invalid admin credentials.')
-        }
+        await new Promise(r => setTimeout(r, 400))
+        const result = loginAsAdmin(email, password)
+        setLoading(false)
+        if (!result.success) { setError(result.error); return }
+        navigate('/dashboard')
     }
 
     return (
@@ -34,7 +35,6 @@ export default function AdminLogin() {
                     </div>
                     <span className="admin-nav-logo-text">FLEETFLOW</span>
                 </div>
-
                 <div className="admin-nav-links">
                     <a href="#" className="admin-nav-link">Vehicle Management</a>
                     <a href="#" className="admin-nav-link">Driver Logs</a>
@@ -43,29 +43,23 @@ export default function AdminLogin() {
                 </div>
             </nav>
 
-            {/* Main content */}
             <div className="admin-auth-content">
                 <div className="admin-portal-badge">
-                    <Shield size={13} />
-                    Admin Portal
+                    <Shield size={13} /> Admin Portal
                 </div>
-
                 <h1 className="admin-page-title">Manager Dashboard</h1>
                 <p className="admin-page-subtitle">Enterprise Fleet Management &amp; Logistics Authorization</p>
 
-                {/* Card */}
                 <div className="admin-card">
                     <form onSubmit={handleSubmit}>
                         {error && (
-                            <div style={{ fontSize: 12, color: '#f87171', marginBottom: 16, padding: '10px 14px', background: 'rgba(239,68,68,0.08)', borderRadius: 8, border: '1px solid rgba(239,68,68,0.2)' }}>
-                                {error}
+                            <div style={{ fontSize: 12.5, color: '#f87171', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, padding: '10px 13px', marginBottom: 18 }}>
+                                ⚠ {error}
                             </div>
                         )}
 
-                        {/* Email */}
                         <div className="admin-field-row">
-                            <AtSign size={14} style={{ color: '#64748b' }} />
-                            Administrative Email
+                            <AtSign size={14} style={{ color: '#64748b' }} /> Administrative Email
                         </div>
                         <div className="admin-input-wrap">
                             <input
@@ -80,10 +74,8 @@ export default function AdminLogin() {
                             />
                         </div>
 
-                        {/* Password */}
                         <div className="admin-field-row">
-                            <Shield size={14} style={{ color: '#64748b' }} />
-                            Secure Password
+                            <Shield size={14} style={{ color: '#64748b' }} /> Secure Password
                         </div>
                         <div className="admin-input-wrap">
                             <input
@@ -100,20 +92,28 @@ export default function AdminLogin() {
                             </button>
                         </div>
 
-                        <button id="admin-login-btn" type="submit" className="admin-btn">
-                            Access Manager Dashboard <ArrowRight size={17} />
+                        {/* Forgot password */}
+                        <div style={{ textAlign: 'right', marginTop: -12, marginBottom: 20 }}>
+                            <a href="#" style={{ fontSize: 12, color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}
+                                onClick={e => e.preventDefault()}>
+                                Forgot password?
+                            </a>
+                        </div>
+
+                        <button id="admin-login-btn" type="submit" className="admin-btn" disabled={loading}>
+                            {loading
+                                ? <><span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} /> Verifying…</>
+                                : <>Access Manager Dashboard <ArrowRight size={17} /></>
+                            }
                         </button>
                     </form>
                 </div>
 
-                {/* Back to staff link */}
                 <p className="admin-back-link">
-                    Not a manager?
-                    <Link to="/login">Go to Standard Staff Login</Link>
+                    Not a manager? <Link to="/login">Go to Standard Staff Login</Link>
                 </p>
             </div>
 
-            {/* Footer */}
             <footer className="admin-page-footer">
                 <div className="admin-footer-left">
                     <span>© 2024 FleetFlow Enterprise. All rights reserved.</span>

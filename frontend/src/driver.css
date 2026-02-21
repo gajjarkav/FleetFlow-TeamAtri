@@ -1,0 +1,934 @@
+/* =============================================
+   Driver / Staff Interface Styles
+   ============================================= */
+
+/* ── Top Navigation ─────────────────────── */
+.driver-root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #080d1a;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.driver-topnav {
+    height: 62px;
+    background: #0a1020;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.driver-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.driver-nav-brand-icon {
+    width: 34px;
+    height: 34px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 14px rgba(37, 99, 235, 0.4);
+}
+
+.driver-nav-brand-text {
+    font-size: 17px;
+    font-weight: 800;
+    color: #f1f5f9;
+    letter-spacing: 0.4px;
+}
+
+.driver-nav-brand-text span {
+    color: #3b82f6;
+}
+
+.driver-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.driver-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border-radius: 9px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+}
+
+.driver-nav-link:hover {
+    background: rgba(59, 130, 246, 0.08);
+    color: #cbd5e1;
+}
+
+.driver-nav-link.active {
+    background: rgba(59, 130, 246, 0.14);
+    color: #60a5fa;
+    font-weight: 600;
+}
+
+.driver-nav-link .nav-badge {
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 100px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}
+
+.driver-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.driver-status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 100px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #34d399;
+}
+
+.driver-avatar {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+}
+
+.driver-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 9px;
+    color: #f87171;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+
+.driver-logout-btn:hover {
+    background: rgba(239, 68, 68, 0.16);
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* ── Page Content ───────────────────────── */
+.driver-page {
+    flex: 1;
+    padding: 28px 32px;
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* ── Driver Page Header ─────────────────── */
+.driver-page-header {
+    margin-bottom: 28px;
+}
+
+.driver-page-header h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #f1f5f9;
+}
+
+.driver-page-header p {
+    font-size: 13.5px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* ── Hero Status Card ───────────────────── */
+.driver-hero-card {
+    background: linear-gradient(135deg, #0f1d38 0%, #111d35 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 18px;
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+.driver-hero-card::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.12), transparent 65%);
+    pointer-events: none;
+}
+
+.driver-hero-left h2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin-bottom: 4px;
+}
+
+.driver-hero-left p {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.driver-hero-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.driver-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.driver-status-badge.on-duty {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.driver-status-badge.on-trip {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.driver-status-badge.off-duty {
+    background: rgba(107, 114, 128, 0.15);
+    color: #9ca3af;
+    border: 1px solid rgba(107, 114, 128, 0.25);
+}
+
+.driver-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 2s infinite;
+}
+
+/* ── Driver Stat Cards ──────────────────── */
+.driver-stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.driver-stat-card {
+    background: #0f1829;
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    border-radius: 14px;
+    padding: 18px 20px;
+    transition: all 0.2s;
+}
+
+.driver-stat-card:hover {
+    border-color: rgba(59, 130, 246, 0.25);
+    transform: translateY(-2px);
+}
+
+.driver-stat-card-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.driver-stat-card-icon.blue {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+.driver-stat-card-icon.green {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+
+.driver-stat-card-icon.amber {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
+
+.driver-stat-card-icon.purple {
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
+}
+
+.driver-stat-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: #f1f5f9;
+    line-height: 1;
+}
+
+.driver-stat-label {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+/* ── Invitation Cards ───────────────────── */
+.invitation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 18px;
+}
+
+.invitation-card {
+    background: #0f1829;
+    border: 1px solid rgba(59, 130, 246, 0.12);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.invitation-card:hover {
+    border-color: rgba(59, 130, 246, 0.28);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+}
+
+.invitation-card.accepted {
+    border-color: rgba(16, 185, 129, 0.3);
+    background: #0a1e16;
+}
+
+.invitation-card.declined {
+    border-color: rgba(107, 114, 128, 0.2);
+    background: #0d111a;
+    opacity: 0.6;
+}
+
+.invitation-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.08);
+}
+
+.invitation-trip-id {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.invitation-card-body {
+    padding: 16px 18px;
+}
+
+.invitation-route {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.invitation-route-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.invitation-route-dot.from {
+    background: #3b82f6;
+}
+
+.invitation-route-dot.to {
+    background: #10b981;
+}
+
+.invitation-route-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(59, 130, 246, 0.2);
+    position: relative;
+}
+
+.invitation-route-arrow {
+    position: absolute;
+    right: -1px;
+    top: -4px;
+    color: rgba(59, 130, 246, 0.5);
+    font-size: 10px;
+}
+
+.invitation-location {
+    flex: 1;
+}
+
+.invitation-location-label {
+    font-size: 10px;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+}
+
+.invitation-location-name {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-top: 2px;
+}
+
+.invitation-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.invitation-meta-item {
+    background: rgba(59, 130, 246, 0.05);
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.invitation-meta-label {
+    font-size: 10px;
+    color: #475569;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.invitation-meta-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #cbd5e1;
+    margin-top: 3px;
+}
+
+.invitation-actions {
+    display: flex;
+    gap: 10px;
+    padding: 14px 18px;
+    border-top: 1px solid rgba(59, 130, 246, 0.08);
+}
+
+.invitation-btn-accept {
+    flex: 1;
+    padding: 10px;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 9px;
+    color: #34d399;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.18s;
+}
+
+.invitation-btn-accept:hover {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: rgba(16, 185, 129, 0.5);
+    transform: translateY(-1px);
+}
+
+.invitation-btn-decline {
+    flex: 1;
+    padding: 10px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 9px;
+    color: #f87171;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.18s;
+}
+
+.invitation-btn-decline:hover {
+    background: rgba(239, 68, 68, 0.16);
+    border-color: rgba(239, 68, 68, 0.4);
+    transform: translateY(-1px);
+}
+
+.invitation-result-badge {
+    flex: 1;
+    padding: 10px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.invitation-result-badge.accepted {
+    background: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+}
+
+.invitation-result-badge.declined {
+    background: rgba(107, 114, 128, 0.1);
+    color: #9ca3af;
+}
+
+/* ── Active Trip Tracker ────────────────── */
+.trip-tracker-card {
+    background: #0f1829;
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    border-radius: 18px;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.trip-tracker-header {
+    background: linear-gradient(135deg, #0f1d38, #111d35);
+    padding: 22px 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.12);
+}
+
+.trip-tracker-body {
+    padding: 26px;
+}
+
+.trip-progress-steps {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    margin-bottom: 28px;
+}
+
+.trip-step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.trip-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: calc(50% + 16px);
+    right: calc(-50% + 16px);
+    height: 2px;
+    background: rgba(59, 130, 246, 0.15);
+}
+
+.trip-step.done:not(:last-child)::after {
+    background: linear-gradient(90deg, #10b981, rgba(16, 185, 129, 0.3));
+}
+
+.trip-step.active:not(:last-child)::after {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.5), rgba(59, 130, 246, 0.1));
+}
+
+.trip-step-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    border: 2px solid;
+    z-index: 1;
+    transition: all 0.3s;
+}
+
+.trip-step.done .trip-step-circle {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
+}
+
+.trip-step.active .trip-step-circle {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: #3b82f6;
+    color: #60a5fa;
+    box-shadow: 0 0 14px rgba(59, 130, 246, 0.3);
+    animation: pulse 2s infinite;
+}
+
+.trip-step.pending .trip-step-circle {
+    background: transparent;
+    border-color: rgba(59, 130, 246, 0.2);
+    color: #475569;
+}
+
+.trip-step-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+
+.trip-step.done .trip-step-label {
+    color: #34d399;
+}
+
+.trip-step.active .trip-step-label {
+    color: #60a5fa;
+}
+
+/* ── Profile Card ───────────────────────── */
+.profile-card {
+    background: linear-gradient(135deg, #0f1d38 0%, #111d35 100%);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 18px;
+    padding: 28px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.profile-avatar-lg {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
+.profile-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: #f1f5f9;
+}
+
+.profile-role {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #60a5fa;
+    margin-top: 3px;
+}
+
+.profile-email {
+    font-size: 12.5px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+/* ── Info Grid ──────────────────────────── */
+.driver-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.driver-info-card {
+    background: #0f1829;
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    border-radius: 14px;
+    padding: 22px;
+}
+
+.driver-info-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #475569;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.driver-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.06);
+    font-size: 13px;
+}
+
+.driver-info-row:last-child {
+    border-bottom: none;
+}
+
+.driver-info-row-label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.driver-info-row-value {
+    color: #f1f5f9;
+    font-weight: 600;
+}
+
+/* ── Empty State ────────────────────────── */
+.driver-empty {
+    text-align: center;
+    padding: 60px 24px;
+    color: #475569;
+}
+
+.driver-empty-icon {
+    margin-bottom: 16px;
+    opacity: 0.35;
+}
+
+.driver-empty h3 {
+    font-size: 17px;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.driver-empty p {
+    font-size: 13px;
+}
+
+/* ── Action Button ──────────────────────── */
+.driver-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.driver-action-btn.primary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+}
+
+.driver-action-btn.primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.driver-action-btn.success {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.driver-action-btn.success:hover {
+    background: rgba(16, 185, 129, 0.25);
+}
+
+.driver-action-btn.danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.driver-action-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+/* ── Quick Actions ──────────────────────── */
+.quick-action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.quick-action-card {
+    background: #0f1829;
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.quick-action-card:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+    background: #111d35;
+}
+
+.quick-action-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quick-action-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+/* ── Access Denied ──────────────────────── */
+.access-denied-root {
+    min-height: 100vh;
+    background: #080d1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 24px;
+    text-align: center;
+}
+
+.access-denied-code {
+    font-size: 96px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 12px;
+}
+
+.access-denied-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin-bottom: 10px;
+}
+
+.access-denied-msg {
+    font-size: 14px;
+    color: #64748b;
+    max-width: 400px;
+    line-height: 1.7;
+    margin-bottom: 28px;
+}
+
+.access-denied-role-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #60a5fa;
+    margin-bottom: 28px;
+    letter-spacing: 0.5px;
+}
+
+/* ── Responsive ─────────────────────────── */
+@media (max-width: 768px) {
+    .driver-topnav {
+        padding: 0 16px;
+    }
+
+    .driver-nav-links {
+        gap: 0;
+    }
+
+    .driver-nav-link {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .driver-page {
+        padding: 20px 16px;
+    }
+
+    .driver-hero-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+}

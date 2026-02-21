@@ -1,27 +1,31 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Truck, AtSign, Shield, Eye, EyeOff, LogIn } from 'lucide-react'
+import { Truck, Mail, Lock, Eye, EyeOff, ArrowRight, Shield } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import '../auth.css'
 
 export default function Login() {
-    const { loginStaff } = useAuth()
+    const { login } = useAuth()
     const navigate = useNavigate()
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPw, setShowPw] = useState(false)
     const [error, setError] = useState('')
+    const [loading, setLoading] = useState(false)
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
+        if (!email || !password) { setError('Please fill in all fields.'); return }
+        setLoading(true)
         setError('')
-        const ok = loginStaff(email, password)
-        if (ok) {
-            navigate('/dashboard')
-        } else {
-            setError('Invalid credentials. Please try again.')
-        }
+        // Short artificial delay for UX feel
+        await new Promise(r => setTimeout(r, 400))
+        const result = login(email, password)
+        setLoading(false)
+        if (!result.success) { setError(result.error); return }
+        if (result.role === 'admin') navigate('/dashboard')
+        else navigate('/driver')
     }
 
     return (
@@ -44,16 +48,18 @@ export default function Login() {
                         <h1 className="auth-card-title">Secure Access</h1>
                         <p className="auth-card-subtitle">Enter your credentials to continue</p>
 
-                        {error && <div className="auth-error-msg" style={{ marginBottom: 14 }}>{error}</div>}
+                        {error && (
+                            <div style={{ fontSize: 12.5, color: '#f87171', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, padding: '10px 13px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                ⚠ {error}
+                            </div>
+                        )}
 
                         {/* Email */}
                         <label className="auth-field-label">Corporate Email</label>
                         <div className="auth-field-wrap">
-                            <span className="auth-field-icon">
-                                <AtSign size={15} />
-                            </span>
+                            <span className="auth-field-icon"><Mail size={15} /></span>
                             <input
-                                id="staff-email"
+                                id="login-email"
                                 className={`auth-input${error ? ' input-error' : ''}`}
                                 type="email"
                                 placeholder="employee@fleetflow.com"
@@ -66,11 +72,9 @@ export default function Login() {
                         {/* Password */}
                         <label className="auth-field-label">Password</label>
                         <div className="auth-field-wrap">
-                            <span className="auth-field-icon">
-                                <Shield size={15} />
-                            </span>
+                            <span className="auth-field-icon"><Lock size={15} /></span>
                             <input
-                                id="staff-password"
+                                id="login-password"
                                 className={`auth-input has-eye${error ? ' input-error' : ''}`}
                                 type={showPw ? 'text' : 'password'}
                                 placeholder="••••••••"
@@ -83,13 +87,24 @@ export default function Login() {
                             </button>
                         </div>
 
-                        {/* Primary CTA */}
-                        <button id="staff-login-btn" type="submit" className="auth-btn-primary">
-                            Staff Log In <LogIn size={17} />
+                        {/* Forgot password */}
+                        <div style={{ textAlign: 'right', marginTop: -10, marginBottom: 20 }}>
+                            <a href="#" style={{ fontSize: 12, color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}
+                                onClick={e => e.preventDefault()}>
+                                Forgot password?
+                            </a>
+                        </div>
+
+                        {/* Submit */}
+                        <button id="login-submit-btn" type="submit" className="auth-btn-primary" disabled={loading}>
+                            {loading
+                                ? <><span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} /> Authenticating…</>
+                                : <><ArrowRight size={17} /> Sign In</>
+                            }
                         </button>
 
-                        {/* Portal Access */}
-                        <div className="auth-portal-label">Portal Access</div>
+                        {/* Admin portal link */}
+                        <div className="auth-portal-label">Admin Access</div>
                         <Link to="/admin-login" style={{ textDecoration: 'none' }}>
                             <button id="admin-portal-btn" type="button" className="auth-btn-dark">
                                 <Shield size={16} style={{ color: '#94a3b8' }} />
