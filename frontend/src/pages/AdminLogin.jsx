@@ -27,21 +27,7 @@ export default function AdminLogin() {
 
     return (
         <div className="admin-auth-root">
-            {/* Navbar */}
-            <nav className="admin-navbar">
-                <div className="admin-nav-logo">
-                    <div className="admin-nav-logo-icon">
-                        <Grid2X2 size={18} color="#93c5fd" />
-                    </div>
-                    <span className="admin-nav-logo-text">FLEETFLOW</span>
-                </div>
-                <div className="admin-nav-links">
-                    <a href="#" className="admin-nav-link">Vehicle Management</a>
-                    <a href="#" className="admin-nav-link">Driver Logs</a>
-                    <a href="#" className="admin-nav-link">Analytics</a>
-                    <button className="admin-nav-support">Support</button>
-                </div>
-            </nav>
+            
 
             <div className="admin-auth-content">
                 <div className="admin-portal-badge">

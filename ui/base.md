@@ -16,3 +16,11 @@ we will be going to have
 2.phone number,
 3.driving license number,
 4.experince,
+
+there shoukd be vertical inventory
+User Registration & Login
+Add / Edit / Delete Records
+Search & Filter Data
+Generate Reports
+Admin Dashboard
+Notification System
