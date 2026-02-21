@@ -1,81 +1,64 @@
 import React, { useState } from 'react'
-import { Plus, Search, Wrench, AlertTriangle, CheckCircle, Clock, ChevronDown } from 'lucide-react'
-import Modal from '../components/Modal'
+import { Search, Wrench, AlertTriangle, CheckCircle, Clock, FileText, ThumbsUp, ThumbsDown, Eye } from 'lucide-react'
 import { vehicles, getVehicleById } from '../data/mockData'
 import { useMaintenance } from '../context/MaintenanceContext'
 
 const statusLabel = { scheduled: 'Scheduled', in_progress: 'In Progress', completed: 'Completed' }
-const maintTypes = ['Oil & Filter Change', 'Brake Replacement', 'Tyre Rotation', 'Engine Overhaul', 'Transmission Service', 'Suspension Check', 'CNG Kit Calibration', 'Battery Replacement', 'Other']
-const defaultForm = { vehicleId: '', type: maintTypes[0], description: '', scheduledDate: '', workshop: '', cost: '' }
+
+const reimbStyle = {
+    pending: { label: 'Pending', color: '#fbbf24', bg: 'rgba(245,158,11,0.12)' },
+    approved: { label: 'Approved', color: '#34d399', bg: 'rgba(16,185,129,0.12)' },
+    rejected: { label: 'Rejected', color: '#f87171', bg: 'rgba(239,68,68,0.12)' },
+}
 
 export default function Maintenance() {
-    const { records, addRecord, updateStatus } = useMaintenance()
+    const { records, vehicleStatuses, approveReimbursement, rejectReimbursement, updateStatus } = useMaintenance()
     const [search, setSearch] = useState('')
     const [filter, setFilter] = useState('all')
-    const [showModal, setShowModal] = useState(false)
-    const [form, setForm] = useState(defaultForm)
-    const [errors, setErrors] = useState({})
+    const [reimbFilter, setReimbFilter] = useState('all')
+    const [billPreview, setBillPreview] = useState(null) // { url, name }
 
+    // ── Filtered records ──
     const filtered = records.filter(r => {
         const matchStatus = filter === 'all' || r.status === filter
+        const matchReimb = reimbFilter === 'all' || r.reimbursementStatus === reimbFilter
         const q = search.toLowerCase()
         const v = getVehicleById(r.vehicleId)
-        const matchSearch = !q || r.type.toLowerCase().includes(q) || (r.workshop || '').toLowerCase().includes(q) || (v && v.regNo.toLowerCase().includes(q))
-        return matchStatus && matchSearch
+        const matchSearch = !q
+            || r.type.toLowerCase().includes(q)
+            || (r.workshop || '').toLowerCase().includes(q)
+            || (v && v.regNo.toLowerCase().includes(q))
+            || (r.driverName || '').toLowerCase().includes(q)
+        return matchStatus && matchReimb && matchSearch
     })
 
-    const validate = () => {
-        const e = {}
-        if (!form.vehicleId) e.vehicleId = 'Select a vehicle'
-        if (!form.scheduledDate) e.scheduledDate = 'Schedule date is required'
-        if (!form.workshop.trim()) e.workshop = 'Workshop name is required'
-        if (!form.cost || +form.cost <= 0) e.cost = 'Estimated cost is required'
-        return e
-    }
-
-    const handleSubmit = () => {
-        const e = validate()
-        if (Object.keys(e).length) { setErrors(e); return }
-        addRecord({ ...form, cost: +form.cost })
-        setShowModal(false)
-        setForm(defaultForm)
-        setErrors({})
-    }
-
-    const f = (k) => (e) => { setForm(p => ({ ...p, [k]: e.target.value })); setErrors(p => ({ ...p, [k]: undefined })) }
-
-    const maintenanceVehicles = vehicles.filter(v => v.status === 'maintenance')
-
-    // Driver-submitted records (tagged with source)
-    const driverRequests = records.filter(r => r.reportedByDriver)
+    const maintenanceVehicles = vehicles.filter(v => (vehicleStatuses[v.id] || v.status) === 'maintenance')
+    const pendingReimb = records.filter(r => r.reimbursementStatus === 'pending')
 
     return (
         <div>
+            {/* Page header */}
             <div className="page-header">
                 <div>
                     <h1>Maintenance</h1>
-                    <p>Track vehicle service records, schedule repairs, and monitor fleet health</p>
+                    <p>Review driver-submitted maintenance requests, approve bills, and monitor fleet health</p>
                 </div>
-                <button className="btn btn-primary" onClick={() => { setShowModal(true); setForm(defaultForm); setErrors({}) }}>
-                    <Plus size={16} /> Schedule Maintenance
-                </button>
             </div>
 
-            {/* Driver-reported requests banner */}
-            {driverRequests.length > 0 && (
-                <div className="alert-banner info" style={{ marginBottom: 18, background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 12, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Wrench size={16} style={{ color: '#60a5fa', flexShrink: 0 }} />
+            {/* Alerts */}
+            {pendingReimb.length > 0 && (
+                <div style={{ marginBottom: 16, background: 'rgba(59,130,246,0.07)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 12, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <FileText size={16} style={{ color: '#60a5fa', flexShrink: 0 }} />
                     <div>
-                        <strong style={{ color: '#93c5fd' }}>{driverRequests.length} driver-submitted request{driverRequests.length > 1 ? 's' : ''}</strong>
-                        <span style={{ color: '#64748b', fontSize: 12, marginLeft: 8 }}>Review and take action below.</span>
+                        <strong style={{ color: '#93c5fd' }}>{pendingReimb.length} reimbursement request{pendingReimb.length > 1 ? 's' : ''} pending your approval</strong>
+                        <span style={{ color: '#64748b', fontSize: 12, marginLeft: 8 }}>Review bills and approve or reject below.</span>
                     </div>
                 </div>
             )}
-
             {maintenanceVehicles.length > 0 && (
                 <div className="alert-banner warning" style={{ marginBottom: 24 }}>
                     <AlertTriangle size={17} style={{ flexShrink: 0 }} />
-                    <div><strong>{maintenanceVehicles.length} vehicle(s) locked for maintenance:</strong> {maintenanceVehicles.map(v => v.regNo).join(', ')} — unavailable for trip dispatch.</div>
+                    <div><strong>{maintenanceVehicles.length} vehicle(s) currently under maintenance:</strong> {maintenanceVehicles.map(v => v.regNo).join(', ')} — unavailable for dispatch.</div>
                 </div>
             )}
 
@@ -85,7 +68,7 @@ export default function Maintenance() {
                     { label: 'Scheduled', count: records.filter(r => r.status === 'scheduled').length, cls: 'amber', Icon: Clock },
                     { label: 'In Progress', count: records.filter(r => r.status === 'in_progress').length, cls: 'blue', Icon: Wrench },
                     { label: 'Completed', count: records.filter(r => r.status === 'completed').length, cls: 'green', Icon: CheckCircle },
-                    { label: 'Total Cost', count: `₹${records.reduce((s, r) => s + (r.cost || 0), 0).toLocaleString()}`, cls: 'red', Icon: AlertTriangle },
+                    { label: 'Pending Bills', count: pendingReimb.length, cls: 'red', Icon: FileText },
                 ].map(s => (
                     <div key={s.label} className="stat-card">
                         <div className={`stat-icon ${s.cls}`}><s.Icon size={20} /></div>
@@ -100,12 +83,19 @@ export default function Maintenance() {
             {/* Table */}
             <div className="table-container">
                 <div className="table-header">
-                    <span className="table-title">Maintenance Records</span>
+                    <span className="table-title">Maintenance Requests</span>
                     <div className="table-actions">
                         <div className="filter-tabs">
                             {['all', 'scheduled', 'in_progress', 'completed'].map(s => (
                                 <button key={s} className={`filter-tab${filter === s ? ' active' : ''}`} onClick={() => setFilter(s)}>
                                     {s === 'all' ? 'All' : statusLabel[s]}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="filter-tabs" style={{ gap: 4 }}>
+                            {['all', 'pending', 'approved', 'rejected'].map(s => (
+                                <button key={s} className={`filter-tab${reimbFilter === s ? ' active' : ''}`} onClick={() => setReimbFilter(s)} style={{ fontSize: 11 }}>
+                                    {s === 'all' ? 'All Bills' : s.charAt(0).toUpperCase() + s.slice(1)}
                                 </button>
                             ))}
                         </div>
@@ -121,105 +111,110 @@ export default function Maintenance() {
                             <th>ID</th>
                             <th>Vehicle</th>
                             <th>Service Type</th>
+                            <th>Driver</th>
                             <th>Workshop</th>
-                            <th>Scheduled</th>
+                            <th>Date</th>
                             <th>Cost (₹)</th>
-                            <th>Source</th>
+                            <th>Bill</th>
                             <th>Status</th>
-                            <th>Action</th>
+                            <th>Reimbursement</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filtered.map(r => {
                             const v = getVehicleById(r.vehicleId)
+                            const rs = reimbStyle[r.reimbursementStatus] || reimbStyle.pending
+                            const vStatus = vehicleStatuses[r.vehicleId]
                             return (
-                                <tr key={r.id} style={r.reportedByDriver ? { background: 'rgba(59,130,246,0.04)' } : {}}>
+                                <tr key={r.id} style={r.reimbursementStatus === 'pending' ? { background: 'rgba(59,130,246,0.03)' } : {}}>
                                     <td style={{ fontFamily: 'monospace', color: 'var(--text-muted)', fontSize: 12 }}>{r.id}</td>
                                     <td>
                                         <div style={{ fontWeight: 600, fontSize: 13 }}>{v ? v.regNo : r.vehicleId}</div>
                                         <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{v ? `${v.make} ${v.model}` : ''}</div>
+                                        {vStatus === 'maintenance' && r.status !== 'completed' && (
+                                            <span style={{ fontSize: 10, fontWeight: 700, color: '#fbbf24', background: 'rgba(245,158,11,0.1)', padding: '2px 6px', borderRadius: 6, display: 'inline-block', marginTop: 3 }}>Under Service</span>
+                                        )}
                                     </td>
                                     <td>
                                         <div style={{ fontWeight: 600 }}>{r.type}</div>
-                                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{r.technician && r.technician !== 'N/A' ? `Tech: ${r.technician}` : ''}</div>
+                                        {r.description && <div style={{ fontSize: 11, color: 'var(--text-muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.description}</div>}
                                     </td>
+                                    <td style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{r.driverName || '—'}</td>
                                     <td style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{r.workshop || '—'}</td>
                                     <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{r.scheduledDate}</td>
-                                    <td style={{ fontWeight: 700 }}>₹{r.cost?.toLocaleString()}</td>
+                                    <td style={{ fontWeight: 700 }}>{r.cost ? `₹${r.cost.toLocaleString()}` : '—'}</td>
                                     <td>
-                                        {r.reportedByDriver
-                                            ? <span style={{ fontSize: 11, fontWeight: 700, color: '#60a5fa', background: 'rgba(59,130,246,0.1)', padding: '3px 8px', borderRadius: 100 }}>Driver</span>
-                                            : <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Admin</span>}
+                                        {r.billUrl ? (
+                                            <button
+                                                onClick={() => setBillPreview({ url: r.billUrl, name: r.billFileName })}
+                                                style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 700, color: '#60a5fa', background: 'rgba(59,130,246,0.08)', border: 'none', borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit' }}
+                                            >
+                                                <Eye size={12} /> View Bill
+                                            </button>
+                                        ) : (
+                                            <span style={{ fontSize: 12, color: '#334155' }}>No bill</span>
+                                        )}
                                     </td>
                                     <td><span className={`badge ${r.status}`}>{statusLabel[r.status]}</span></td>
                                     <td>
-                                        {r.status !== 'completed' && (
-                                            <select
-                                                value={r.status}
-                                                onChange={e => updateStatus(r.id, e.target.value)}
-                                                style={{ background: '#0a1422', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 7, color: '#cbd5e1', fontSize: 12, padding: '5px 8px', cursor: 'pointer', fontFamily: 'inherit' }}
-                                            >
-                                                <option value="scheduled">Scheduled</option>
-                                                <option value="in_progress">In Progress</option>
-                                                <option value="completed">Completed</option>
-                                            </select>
-                                        )}
-                                        {r.status === 'completed' && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Done</span>}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <span style={{ fontSize: 11, fontWeight: 700, color: rs.color, background: rs.bg, padding: '3px 8px', borderRadius: 100, whiteSpace: 'nowrap' }}>{rs.label}</span>
+                                            {r.reimbursementStatus === 'pending' && (
+                                                <div style={{ display: 'flex', gap: 4 }}>
+                                                    <button
+                                                        title="Approve reimbursement"
+                                                        onClick={() => approveReimbursement(r.id)}
+                                                        style={{ background: 'rgba(16,185,129,0.1)', border: 'none', borderRadius: 6, padding: '5px 7px', cursor: 'pointer', color: '#34d399', display: 'flex', alignItems: 'center' }}
+                                                    >
+                                                        <ThumbsUp size={13} />
+                                                    </button>
+                                                    <button
+                                                        title="Reject reimbursement"
+                                                        onClick={() => rejectReimbursement(r.id)}
+                                                        style={{ background: 'rgba(239,68,68,0.1)', border: 'none', borderRadius: 6, padding: '5px 7px', cursor: 'pointer', color: '#f87171', display: 'flex', alignItems: 'center' }}
+                                                    >
+                                                        <ThumbsDown size={13} />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             )
                         })}
                         {filtered.length === 0 && (
-                            <tr><td colSpan={9} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No maintenance records found</td></tr>
+                            <tr><td colSpan={10} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No maintenance records found</td></tr>
                         )}
                     </tbody>
                 </table>
             </div>
 
-            {/* Modal */}
-            {showModal && (
-                <Modal title="Schedule Maintenance" onClose={() => setShowModal(false)}
-                    footer={<>
-                        <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                        <button className="btn btn-primary" onClick={handleSubmit}><Wrench size={15} /> Schedule</button>
-                    </>}
+            {/* Bill preview modal */}
+            {billPreview && (
+                <div
+                    onClick={() => setBillPreview(null)}
+                    style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
                 >
-                    <div className="form-grid">
-                        <div className="form-group full">
-                            <label className="form-label">Vehicle *</label>
-                            <select className={`form-control${errors.vehicleId ? ' error' : ''}`} value={form.vehicleId} onChange={f('vehicleId')}>
-                                <option value="">— Select Vehicle —</option>
-                                {vehicles.map(v => <option key={v.id} value={v.id}>{v.regNo} – {v.make} {v.model}</option>)}
-                            </select>
-                            {errors.vehicleId && <span className="form-error">{errors.vehicleId}</span>}
+                    <div
+                        onClick={e => e.stopPropagation()}
+                        style={{ background: '#0f1829', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 18, padding: 24, maxWidth: 700, width: '100%', maxHeight: '85vh', display: 'flex', flexDirection: 'column', gap: 16 }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9' }}>{billPreview.name || 'Bill Preview'}</div>
+                            <div style={{ display: 'flex', gap: 10 }}>
+                                <a href={billPreview.url} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#60a5fa', fontWeight: 600 }}>Open in new tab</a>
+                                <button onClick={() => setBillPreview(null)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 20, lineHeight: 1 }}>×</button>
+                            </div>
                         </div>
-                        <div className="form-group full">
-                            <label className="form-label">Service Type</label>
-                            <select className="form-control" value={form.type} onChange={f('type')}>
-                                {maintTypes.map(t => <option key={t}>{t}</option>)}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Scheduled Date *</label>
-                            <input className={`form-control${errors.scheduledDate ? ' error' : ''}`} type="date" value={form.scheduledDate} onChange={f('scheduledDate')} />
-                            {errors.scheduledDate && <span className="form-error">{errors.scheduledDate}</span>}
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Estimated Cost (₹) *</label>
-                            <input className={`form-control${errors.cost ? ' error' : ''}`} type="number" placeholder="5000" value={form.cost} onChange={f('cost')} />
-                            {errors.cost && <span className="form-error">{errors.cost}</span>}
-                        </div>
-                        <div className="form-group full">
-                            <label className="form-label">Workshop / Service Center *</label>
-                            <input className={`form-control${errors.workshop ? ' error' : ''}`} placeholder="e.g. Tata ExPress Fleet, Ahmedabad" value={form.workshop} onChange={f('workshop')} />
-                            {errors.workshop && <span className="form-error">{errors.workshop}</span>}
-                        </div>
-                        <div className="form-group full">
-                            <label className="form-label">Description</label>
-                            <input className="form-control" placeholder="Optional description..." value={form.description} onChange={f('description')} />
+                        <div style={{ flex: 1, overflow: 'auto', borderRadius: 10, background: '#0a1422', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+                            {billPreview.name?.endsWith('.pdf') ? (
+                                <iframe src={billPreview.url} title="Bill" style={{ width: '100%', height: 500, border: 'none', borderRadius: 10 }} />
+                            ) : (
+                                <img src={billPreview.url} alt="Bill" style={{ maxWidth: '100%', maxHeight: 500, borderRadius: 10, objectFit: 'contain' }} />
+                            )}
                         </div>
                     </div>
-                </Modal>
+                </div>
             )}
         </div>
     )
